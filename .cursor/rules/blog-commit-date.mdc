@@ -3,9 +3,14 @@ description: 블로그 글 커밋 시 frontmatter date를 git 커밋 날짜로 �
 alwaysApply: true
 ---
 
-# 블로그 글 커밋 날짜
+# 블로그 글 커밋·배포
 
 `content/posts/` 글을 커밋·푸시할 때, **실제 오늘 날짜가 아니라** 해당 글 frontmatter의 `date`를 git 커밋 날짜로 쓴다.
+
+## 배포 (PR 없이 main)
+
+블로그 글(및 글에 딸린 `public/images/` 등)은 **PR을 만들지 않는다.**  
+`feature/*`에 커밋한 뒤 **main에 병합·푸시**해 바로 반영한다. 코드/인프라 변경과 달리 블로그 발행은 리뷰 PR 대상이 아니다.
 
 ## 규칙
 
@@ -13,6 +18,7 @@ alwaysApply: true
 - 시간대는 한국(`+09:00`), 시각은 `12:00:00` 사용
 - 커밋 메시지는 **한글**로 작성
 - author는 이 저장소 설정대로 `beatmeJY <beatmejy@gmail.com>`
+- 공개 발행 시 `draft: false`로 두고 main에 반영한다
 
 ## 예시
 
