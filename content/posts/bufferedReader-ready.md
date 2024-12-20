@@ -1,7 +1,7 @@
 ---
 title: "자바 BufferedReader.ready() 사용해도 괜찮을까?"
 description: "소켓에서 데이터가 아직 도착하지 않았을 때 ready()가 non-blocking하게 false를 반환하면서 겪은 버그와, 그 원인을 소스 코드로 추적한 과정"
-date: "2023-12-11"
+date: "2024-12-20"
 category: "Backend"
 tags:
   - Java
