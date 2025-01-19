@@ -13,7 +13,7 @@ popularRank: 2
 
 한정 수량 예약 시스템에서 겪은 동시성 문제를 Redisson Lock으로 해결한 과정을 정리한다. Lock 선택 이유, 분산 Lock을 쓸 때 주의할 점, Multi Lock 확장 순으로 다룬다.
 
-관련 문서: [Redisson 공식 위키](https://github.com/redisson/redisson/wiki)
+관련 문서: [Redisson 공식 문서 - Locks and synchronizers](https://redisson.pro/docs/data-and-services/locks-and-synchronizers/)
 
 ---
 
@@ -372,5 +372,5 @@ leaseTime은 처음엔 20배 여유를 둔 10초 고정값이었지만, 처리�
 
 ## 참고
 
-- [Redisson 공식 위키](https://github.com/redisson/redisson/wiki)
-- [Redisson Lock and Synchronizers](https://github.com/redisson/redisson/wiki/8.-distributed-locks-and-synchronizers)
+- [Redisson 공식 문서 - Locks and synchronizers](https://redisson.pro/docs/data-and-services/locks-and-synchronizers/)
+- [Redisson 공식 문서 - Overview](https://redisson.pro/docs/)
