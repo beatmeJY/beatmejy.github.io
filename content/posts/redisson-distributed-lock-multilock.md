@@ -263,17 +263,27 @@ public class DistributedLockAop {
     private List<RLock> getLocks(
         MethodSignature signature, ProceedingJoinPoint joinPoint, DistributedLock distributedLock
     ) {
-        List<RLock> rLocks = new ArrayList<>();
+        List<LocalDateTime> lockDateTimes = new ArrayList<>();
         for (String keyExpression : distributedLock.keys()) {
             Object result = CustomSpELParser.getDynamicValue(
                 signature.getParameterNames(), joinPoint.getArgs(), keyExpression
             );
             if (result instanceof LocalDateTime dateTime) {
-                rLocks.add(redissonClient.getLock(DISTRIBUTED_LOCK_PREFIX + dateTime.truncatedTo(ChronoUnit.HOURS)));
+                lockDateTimes.add(dateTime.truncatedTo(ChronoUnit.HOURS));
             } else {
                 log.error("Lock Key가 null이거나 LocalDateTime 타입이어야 합니다.");
                 throw new BusinessException(EExceptionStatus.INTERNAL_SERVER_ERROR);
             }
+        }
+
+        // 요청 인자 순서와 무관하게 항상 같은 순서(오름차순)로 락을 잡도록 정렬한다.
+        // 어느 스레드가 요청했든 락 획득 순서가 동일해지므로, 서로 반대 순서로 락을 잡다
+        // 부딪히는 경우 자체가 발생하지 않는다.
+        Collections.sort(lockDateTimes);
+
+        List<RLock> rLocks = new ArrayList<>(lockDateTimes.size());
+        for (LocalDateTime dateTime : lockDateTimes) {
+            rLocks.add(redissonClient.getLock(DISTRIBUTED_LOCK_PREFIX + dateTime));
         }
         return rLocks;
     }
@@ -345,6 +355,48 @@ public class DistributedLockAop {
 - `keys` 속성으로 여러 키를 받는다.
 - `RedissonMultiLock`으로 여러 키를 하나의 원자적 단위로 묶는다.
 - `handleSingleLock`과 `handleMultiLock`을 분리해, 락이 하나든 여러 개든 같은 어노테이션으로 처리한다.
+- `getLocks()`에서 락을 시간 오름차순으로 정렬해서 잡는다.
+
+### MultiLock은 왜, 그리고 어떻게 정렬이 필요한가
+
+`updateReservedQty`처럼 두 슬롯의 순서를 바꿀 수 있는 메서드라면, 호출하는 쪽에 따라 실제 락 순서가 뒤집힐 수 있다. 14시 슬롯을 16시로 옮기는 스레드는 `[lock14, lock16]` 순서로, 반대로 16시를 14시로 옮기는 스레드는 `[lock16, lock14]` 순서로 락을 요청하게 된다.
+
+이때 어떤 일이 생기는지 확인하려고 Redisson 공식 소스(`RedissonMultiLock.tryLock`)를 직접 읽어봤다. 핵심 로직은 이렇다.
+
+```java
+for (RLock lock : locks) {
+    boolean lockAcquired = lock.tryLock(awaitTime, newLeaseTime, TimeUnit.MILLISECONDS);
+    if (lockAcquired) {
+        acquiredLocks.add(lock);
+    } else {
+        unlockInner(acquiredLocks);       // 실패하면 그동안 잡은 락을 전부 반환
+        if (waitTime <= 0) return false;
+        acquiredLocks.clear();
+        // 반복자를 되돌려 처음부터 다시 시도
+    }
+}
+```
+
+락 하나라도 획득에 실패하면, 그동안 잡고 있던 락을 즉시 전부 반환하고 처음부터 재시도한다. 즉 일부만 잡은 채로 나머지를 기다리며 블로킹하는 구간이 없어서, 두 스레드가 서로가 쥔 락을 영원히 기다리는 **고전적인 의미의 데드락은 발생하지 않는다.**
+
+다만 이 방식에는 다른 비용이 있다. 두 스레드가 정확히 반대 순서로 계속 요청하면, 서로 첫 번째 락은 잡았다가 두 번째 락에서 부딪혀 반환하고 재시도하는 걸 반복할 수 있다. 데드락은 아니지만, `waitTime` 예산을 재시도로 소모하다 결국 둘 다(혹은 한쪽이) 락 획득에 실패해 예외로 끝날 가능성이 있다. 사용자 입장에서는 "분명 여유 있게 재시도했는데 실패했다"는 결과로 보인다.
+
+이 재시도 자체를 없애는 방법은 간단했다. **모든 스레드가 항상 같은 순서로 락을 요청하도록 정렬하면 된다.** 어느 쪽이 호출했든 락을 오름차순(시간 순서)으로 정렬해서 잡으면, 두 스레드는 항상 같은 락을 먼저 놓고 경쟁하게 된다. 즉 한쪽이 첫 번째 락을 잡으면 다른 쪽은 그 자리에서 대기하다가 순서대로 넘겨받을 뿐, "각자 다른 락을 먼저 잡고 서로의 두 번째 락을 기다리다 풀고 재시도"하는 상황 자체가 생기지 않는다.
+
+```java
+List<LocalDateTime> lockDateTimes = new ArrayList<>();
+// ... SpEL로 각 키의 LocalDateTime을 수집 ...
+
+// 요청 인자 순서와 무관하게 항상 같은 순서(오름차순)로 락을 잡도록 정렬한다.
+Collections.sort(lockDateTimes);
+
+List<RLock> rLocks = new ArrayList<>(lockDateTimes.size());
+for (LocalDateTime dateTime : lockDateTimes) {
+    rLocks.add(redissonClient.getLock(DISTRIBUTED_LOCK_PREFIX + dateTime));
+}
+```
+
+정렬은 `getLocks()` 안에서 한 번만 처리하면 되고, 락을 요청하는 쪽(`updateReservedQty`)은 인자를 어떤 순서로 넘기든 신경 쓸 필요가 없어진다.
 
 사용 예:
 
