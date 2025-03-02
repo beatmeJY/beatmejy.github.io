@@ -8,7 +8,7 @@ tags:
   - Redis
   - Redisson
 draft: false
-popularRank: 3
+popularRank: 4
 ---
 
 한정 수량 예약 시스템에서 겪은 동시성 문제를 Redisson Lock으로 해결한 과정을 정리한다. Lock 선택 이유, 분산 Lock을 쓸 때 주의할 점, Multi Lock 확장 순으로 다룬다.

@@ -13,7 +13,7 @@ tags:
   - Transactional
   - Rollback
 draft: false
-popularRank: 2.5
+popularRank: 3
 ---
 
 같은 `@Transactional` 메서드 안에서 한 테이블의 두 행을 수정했는데, 예외로 트랜잭션이 롤백된 뒤 확인해보니 첫 번째 행의 변경만 DB에 남아 있었다. 트랜잭션은 "전부 반영되거나, 전부 반영되지 않거나"를 보장해야 하는데 그 전제가 깨진 상황이었다.
