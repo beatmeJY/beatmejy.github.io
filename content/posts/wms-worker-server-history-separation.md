@@ -1,7 +1,7 @@
 ---
 title: "WMS 작업 이력을 업무 API에서 분리한 이유"
 description: "WMS 작업 이력 처리를 메인 서버에서 분리해 Logis Worker로 옮긴 경험. AOP로 업무 API에서 작업 정보를 자동 수집하고, 업무가 정상 처리된 경우에만 Redis Streams로 이벤트를 전달하도록 구성한 과정과 그 트레이드오프를 정리한다."
-date: "2026-03-23"
+date: "2025-11-15"
 category: "Backend"
 tags:
   - Spring
