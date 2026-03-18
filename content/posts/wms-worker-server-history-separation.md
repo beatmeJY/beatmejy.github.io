@@ -8,7 +8,7 @@ tags:
   - AOP
   - Redis
 draft: false
-popularRank: 3
+popularRank: 1
 ---
 
 WMS에서는 입고·적재·상품화·피킹·출고 같은 공정이 끝날 때마다 작업자·작업장·작업 코드·처리량 같은 이력이 생긴다. 처음에는 메인 서버가 업무 API를 처리하면서 이런 이력·통계 쪽까지 같이 맡고 있었다.
