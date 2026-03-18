@@ -3,7 +3,7 @@ title: "하위 서버 하나 죽었다고 우리 서버까지? 실제 장애 복
 description: "하위 서버 장애가 전체 서버의 스레드 풀 고갈로 번진 사고를 계기로 Resilience4j 서킷 브레이커를 도입한 과정"
 date: "2023-10-14"
 category: "Backend"
-popularRank: 1
+popularRank: 3
 tags:
   - Java
   - Spring Boot
