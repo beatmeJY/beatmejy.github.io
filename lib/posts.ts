@@ -9,6 +9,10 @@ import {
 
 const postsDirectory = path.join(process.cwd(), "content/posts");
 
+function includeDrafts() {
+  return process.env.NODE_ENV === "development";
+}
+
 export type Post = {
   slug: string;
   title: string;
@@ -17,15 +21,20 @@ export type Post = {
   tags: string[];
   category: string;
   categorySlug: CategorySlug;
+  draft: boolean;
   content: string;
 };
+
+function isPostMarkdownFile(fileName: string) {
+  return fileName.endsWith(".md") && !fileName.startsWith("_");
+}
 
 function readMarkdownFiles() {
   if (!fs.existsSync(postsDirectory)) {
     return [];
   }
 
-  return fs.readdirSync(postsDirectory).filter((fileName) => fileName.endsWith(".md"));
+  return fs.readdirSync(postsDirectory).filter(isPostMarkdownFile);
 }
 
 function parsePost(slug: string, fileContents: string): Post {
@@ -58,11 +67,23 @@ function parsePost(slug: string, fileContents: string): Post {
     tags,
     category: category?.name ?? "etc",
     categorySlug: category?.slug ?? "etc",
+    draft: data.draft === true,
     content,
   };
 }
 
-export function getAllPosts(): Post[] {
+function readPostFile(slug: string): Post {
+  if (slug.startsWith("_")) {
+    throw new Error(`Post "${slug}" is a template file.`);
+  }
+
+  const fullPath = path.join(postsDirectory, `${slug}.md`);
+  const fileContents = fs.readFileSync(fullPath, "utf8");
+  return parsePost(slug, fileContents);
+}
+
+export function getAllPosts(options?: { includeDrafts?: boolean }): Post[] {
+  const showDrafts = options?.includeDrafts ?? includeDrafts();
   const posts = readMarkdownFiles().map((fileName) => {
     const slug = fileName.replace(/\.md$/, "");
     const fullPath = path.join(postsDirectory, fileName);
@@ -70,17 +91,23 @@ export function getAllPosts(): Post[] {
     return parsePost(slug, fileContents);
   });
 
-  return posts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  return posts
+    .filter((post) => showDrafts || !post.draft)
+    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
 
 export function getPostBySlug(slug: string): Post {
-  const fullPath = path.join(postsDirectory, `${slug}.md`);
-  const fileContents = fs.readFileSync(fullPath, "utf8");
-  return parsePost(slug, fileContents);
+  const post = readPostFile(slug);
+
+  if (post.draft && !includeDrafts()) {
+    throw new Error(`Post "${slug}" is a draft.`);
+  }
+
+  return post;
 }
 
 export function getAllSlugs() {
-  return getAllPosts().map((post) => post.slug);
+  return getAllPosts({ includeDrafts: includeDrafts() }).map((post) => post.slug);
 }
 
 export function getPostsByCategory(categorySlug: string) {

@@ -6,6 +6,7 @@ tags:
   - Blog
   - Dev
 category: "etc"
+draft: true
 ---
 
 안녕하세요.

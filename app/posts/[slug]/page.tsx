@@ -19,7 +19,14 @@ export async function generateMetadata({
   params,
 }: PostPageProps): Promise<Metadata> {
   const { slug } = await params;
-  const post = getPostBySlug(slug);
+  let post;
+
+  try {
+    post = getPostBySlug(slug);
+  } catch {
+    return {};
+  }
+
   const canonical = `/posts/${post.slug}/`;
 
   return {

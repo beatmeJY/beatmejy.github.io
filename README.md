@@ -15,24 +15,12 @@ npm run dev
 
 ## 게시글 작성
 
-`content/posts/`에 Markdown 파일을 추가합니다. 파일 이름이 URL slug가 됩니다.
+`content/posts/_template.md`를 복사해 `content/posts/my-new-post.md`로 저장합니다. 파일 이름이 URL slug가 됩니다.
 
-```md
----
-title: "MySQL 인덱스 최적화"
-description: "EXPLAIN을 이용한 쿼리 분석과 인덱스 최적화"
-date: "2026-08-31"
-tags:
-  - MySQL
-  - Database
-category: "Database"
----
-
-본문...
-```
-
-- `category`는 `Backend`, `Database`, `Infrastructure`, `DevOps`, `Architecture`, `etc` 중 하나입니다.
+- `category`는 `Backend`, `Database`, `Infrastructure`, `DevOps`, `Architecture`, `Retrospective`, `etc` 중 하나입니다.
 - 이미지는 `public/images/`에 넣고 `/images/파일명`으로 참조합니다.
+- `_`로 시작하는 파일(`_template.md`)은 게시글로 취급하지 않습니다.
+- `draft: true`인 글은 목록·상세에 나오지 않습니다. 공개할 때 `draft: false`로 바꿉니다.
 
 ## 빌드
 
