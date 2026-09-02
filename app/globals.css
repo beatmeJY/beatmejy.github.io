@@ -8,7 +8,10 @@
   --border: #d0d7de;
   --accent: #0969da;
   --accent-hover: #0550ae;
-  --code-bg: #f6f8fa;
+  --code-bg: #ffffff;
+  --code-inline-bg: #eaeef2;
+  --code-inline-border: #d0d7de;
+  --code-inline-fg: #bc4c00;
   --quote-bg: #f6f8fa;
   --shadow: 0 1px 2px rgb(31 35 40 / 6%);
 }
@@ -36,6 +39,9 @@
     --accent: #4493f8;
     --accent-hover: #79b8ff;
     --code-bg: #161b22;
+    --code-inline-bg: #21262d;
+    --code-inline-border: #30363d;
+    --code-inline-fg: #f0883e;
     --quote-bg: #161b22;
     --shadow: 0 1px 2px rgb(0 0 0 / 40%);
   }
@@ -195,9 +201,25 @@ body {
   font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
+.markdown pre code[data-theme*=" "],
+.markdown pre code[data-theme*=" "] span {
+  color: var(--shiki-light);
+  background-color: var(--shiki-light-bg);
+}
+
+@media (prefers-color-scheme: dark) {
+  .markdown pre code[data-theme*=" "],
+  .markdown pre code[data-theme*=" "] span {
+    color: var(--shiki-dark);
+    background-color: var(--shiki-dark-bg);
+  }
+}
+
 .markdown :not(pre) > code {
   border-radius: 0.25rem;
-  background: var(--code-bg);
+  border: 1px solid var(--code-inline-border);
+  background: var(--code-inline-bg);
+  color: var(--code-inline-fg);
   padding: 0.15em 0.35em;
   font-size: 0.9em;
   font-family: var(--font-geist-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
