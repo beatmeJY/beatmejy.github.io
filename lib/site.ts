@@ -14,6 +14,7 @@ export const categories = [
   { slug: "infrastructure", name: "Infrastructure" },
   { slug: "devops", name: "DevOps" },
   { slug: "architecture", name: "Architecture" },
+  { slug: "retrospective", name: "Retrospective" },
   { slug: "etc", name: "etc" },
 ] as const;
 
