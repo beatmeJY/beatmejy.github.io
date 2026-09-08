@@ -6,7 +6,7 @@ open: []
 # 이어서 할 일
 
 이 파일은 PC를 바꿔도 작업을 이어가기 위한 인수인계 메모입니다.
-`작업 시작`이면 pull·싱크 후 여기 내용을 브리핑하고, `코딩종료`면 갱신·커밋·푸시한다.
+`작업 시작`이면 pull·싱크 후 여기 내용을 브리핑하고, `작업 종료`/`코딩종료`면 갱신·커밋·푸시한다.
 프로젝트/에이전트 세션을 열면 `open` 파일을 엽니다.
 
 ## 다음에 할 일
@@ -19,6 +19,9 @@ open: []
 
 ## 오늘 한 일
 
-- (Windows) git 메일·auto-pull/CONTINUE 워크플로·gh 인증·sync 커밋 푸시
+- git 작성자 이메일을 `beatmejy@gmail.com`으로 맞춤, GitHub CLI 로그인·push 인증
+- 프로젝트 열 때 auto-pull + `CONTINUE.md` 인수인계 워크플로 추가
+- 폴더 열기 sync가 `readStdin()`에서 멈추던 버그 수정 (요약 출력 + CONTINUE 자동 오픈)
+- 커밋 메시지 항상 한국어 규칙 추가
+- `작업 시작` / `작업 종료` 트리거로 싱크·인수인계 브리핑·커밋 흐름 정리
 - (Mac) hang 조사, `blog-commit-date.mdc` 추가
-- (Windows) 폴더 열기 태스크가 `readStdin()`에서 무한 대기하던 버그 수정 — 요약 출력 + `CONTINUE.md` 자동 오픈

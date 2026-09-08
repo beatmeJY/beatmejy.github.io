@@ -1,9 +1,9 @@
 ---
-description: 작업 시작/코딩종료 시 pull·싱크·CONTINUE.md 인수인계
+description: 작업 시작/작업 종료 시 pull·싱크·CONTINUE.md 인수인계
 alwaysApply: true
 ---
 
-# 세션 동기화 / 작업 시작 / 코딩종료
+# 세션 동기화 / 작업 시작 / 작업 종료
 
 ## 세션이 시작되거나 사용자가 "작업 시작"이라고 하면
 
@@ -14,7 +14,7 @@ alwaysApply: true
 3. frontmatter `open`에 경로가 있으면 해당 파일을 Read로 연다. 없으면 `CONTINUE.md`만 연다.
 4. 필요하면 `node .cursor/hooks/sync-on-open.mjs`로 sync 상태를 갱신한다.
 
-## 사용자가 "코딩종료"라고 하면
+## 사용자가 "작업 종료" / "코딩종료" / "코딩 종료"라고 하면
 
 다음을 순서대로 수행한다. 커밋은 사용자가 이 문구로 요청한 것으로 본다.
 
