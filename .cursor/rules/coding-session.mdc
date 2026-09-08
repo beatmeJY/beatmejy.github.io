@@ -1,15 +1,18 @@
 ---
-description: 프로젝트 열기 시 동기화, 코딩종료 시 커밋·CONTINUE.md 인수인계
+description: 작업 시작/코딩종료 시 pull·싱크·CONTINUE.md 인수인계
 alwaysApply: true
 ---
 
-# 세션 동기화 / 코딩종료
+# 세션 동기화 / 작업 시작 / 코딩종료
 
-## 세션이 시작되면
+## 세션이 시작되거나 사용자가 "작업 시작"이라고 하면
 
-1. `CONTINUE.md`를 읽고, `## 오늘 한 일` / `## 다음에 할 일` / WIP를 사용자에게 짧게 보여 준다.
-2. frontmatter `open`에 경로가 있으면 해당 파일을 바로 Read로 연다. 없으면 `CONTINUE.md`만 연다.
-3. `.cursor/last-sync.json`이 있으면 pull 결과를 참고한다. 로컬이 뒤처져 있고 working tree가 깨끗하면 `git pull --ff-only`를 실행한다.
+다음을 **바로** 수행한다. (폴더만 열렸을 때도 동일하게 맞춘다.)
+
+1. working tree가 깨끗하면 `git pull --ff-only`로 원격과 싱크한다. dirty면 pull을 건너뛰고 이유를 알린다.
+2. `CONTINUE.md`를 읽고 `## 오늘 한 일` / `## 다음에 할 일` / `## 작성 중 (WIP)` / `open`을 사용자에게 **한국어로 짧게 브리핑**한다.
+3. frontmatter `open`에 경로가 있으면 해당 파일을 Read로 연다. 없으면 `CONTINUE.md`만 연다.
+4. 필요하면 `node .cursor/hooks/sync-on-open.mjs`로 sync 상태를 갱신한다.
 
 ## 사용자가 "코딩종료"라고 하면
 
