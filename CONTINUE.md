@@ -1,6 +1,8 @@
 ---
 updated: 2026-09-08
-open: []
+open:
+  - path: content/posts/minimizing-uuid-duplicates.md
+    note: UUID 중복 최소화 글 본문 작성 (draft 유지)
 ---
 
 # 이어서 할 일
@@ -11,17 +13,14 @@ open: []
 
 ## 다음에 할 일
 
-- (작성 중인 글 없음 — 새 글/기능 작업부터 시작하면 됨)
+- `minimizing-uuid-duplicates.md` 본문 채우기 (문제·원인·해결·배운 점)
+- 공개 시 `draft: false`로 전환
 
 ## 작성 중 (WIP)
 
-- 없음
+- `content/posts/minimizing-uuid-duplicates.md` — 템플릿 초안만 있음, `draft: true`
 
 ## 오늘 한 일
 
-- git 작성자 이메일을 `beatmejy@gmail.com`으로 맞춤, GitHub CLI 로그인·push 인증
-- 프로젝트 열 때 auto-pull + `CONTINUE.md` 인수인계 워크플로 추가
-- 폴더 열기 sync가 `readStdin()`에서 멈추던 버그 수정 (요약 출력 + CONTINUE 자동 오픈)
-- 커밋 메시지 항상 한국어 규칙 추가
-- `작업 시작` / `작업 종료` 트리거로 싱크·인수인계 브리핑·커밋 흐름 정리
-- (Mac) hang 조사, `blog-commit-date.mdc` 추가
+- UUID 중복 최소화 글 초안 파일 생성 (`draft: true`)
+- 작업 시작으로 원격 싱크·CONTINUE 브리핑 확인
