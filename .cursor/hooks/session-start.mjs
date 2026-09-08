@@ -1,30 +1,14 @@
-import {
-  buildResumeContext,
-  loadContinue,
-  openFilesInCursor,
-  projectRoot,
-  readStdin,
-  syncFromRemote,
-  writeSyncState,
-} from "./lib.mjs";
+import { runSyncOnOpen } from "./sync-on-open.mjs";
+import { buildResumeContext, projectRoot } from "./lib.mjs";
 
-readStdin();
+// Cursor sessionStart hook. Keep stdout JSON-only.
+let additional_context = "";
+try {
+  const { sync } = runSyncOnOpen({ event: "sessionStart", quiet: true });
+  additional_context = buildResumeContext(projectRoot(), sync);
+} catch (error) {
+  additional_context = `[session-sync] error: ${error?.message || error}`;
+  process.stderr.write(`${additional_context}\n`);
+}
 
-const root = projectRoot();
-const sync = syncFromRemote(root);
-const cont = loadContinue(root);
-const opened = openFilesInCursor(
-  root,
-  cont.open.map((item) => item.path),
-);
-
-writeSyncState(root, {
-  event: "sessionStart",
-  sync,
-  open: cont.open,
-  opened: opened.opened,
-  openFailed: opened.failed,
-});
-
-const additional_context = buildResumeContext(root, sync);
 process.stdout.write(JSON.stringify({ additional_context }) + "\n");

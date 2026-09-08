@@ -61,11 +61,12 @@ export function parseContinueOpen(markdown) {
   return open;
 }
 
-export function git(root, args) {
+export function git(root, args, timeoutMs = 60000) {
   return execFileSync("git", args, {
     cwd: root,
     encoding: "utf8",
     stdio: ["ignore", "pipe", "pipe"],
+    timeout: timeoutMs,
   }).trim();
 }
 

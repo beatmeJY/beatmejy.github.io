@@ -7,10 +7,9 @@ alwaysApply: true
 
 ## 세션이 시작되면
 
-1. `CONTINUE.md`를 읽는다.
-2. frontmatter `open`에 경로가 있으면 해당 파일을 바로 Read로 연다.
-3. 사용자에게 이어서 할 일을 한두 문장으로 안내한다.
-4. `.cursor/last-sync.json`이 있으면 pull 결과를 참고한다. 로컬이 뒤처져 있고 working tree가 깨끗하면 `git pull --ff-only`를 실행한다.
+1. `CONTINUE.md`를 읽고, `## 오늘 한 일` / `## 다음에 할 일` / WIP를 사용자에게 짧게 보여 준다.
+2. frontmatter `open`에 경로가 있으면 해당 파일을 바로 Read로 연다. 없으면 `CONTINUE.md`만 연다.
+3. `.cursor/last-sync.json`이 있으면 pull 결과를 참고한다. 로컬이 뒤처져 있고 working tree가 깨끗하면 `git pull --ff-only`를 실행한다.
 
 ## 사용자가 "코딩종료"라고 하면
 
