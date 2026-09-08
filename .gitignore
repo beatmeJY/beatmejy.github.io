@@ -24,6 +24,7 @@
 .DS_Store
 *.pem
 .idea/
+.cursor/last-sync.json
 
 # debug
 npm-debug.log*
