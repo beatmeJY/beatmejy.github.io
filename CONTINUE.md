@@ -23,3 +23,4 @@ open: []
 - 홈 인기 글(`popularRank`, 큰 수일수록 위) + 서킷브레이커 글 공개
 - Google Search Console 인증 메타 추가
 - Redisson 분산 락·MultiLock 글 작성·공개 (`draft: false`, date 2025-01-19, `popularRank: 2`)
+- Redisson 글 참고 링크를 공식 docs로 갱신
