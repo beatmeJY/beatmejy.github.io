@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { CategoryList } from "@/components/CategoryList";
 import { PostCard } from "@/components/PostCard";
-import { getAllPosts } from "@/lib/posts";
+import { getPopularPosts } from "@/lib/posts";
 import { siteConfig } from "@/lib/site";
 
 export const metadata: Metadata = {
@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 };
 
 export default function Home() {
-  const recentPosts = getAllPosts().slice(0, 5);
+  const popularPosts = getPopularPosts();
 
   return (
     <div className="flex flex-col gap-12">
@@ -34,23 +34,23 @@ export default function Home() {
         </p>
       </section>
 
-      <section aria-labelledby="recent-heading">
+      <section aria-labelledby="popular-heading">
         <div className="mb-4 flex items-end justify-between gap-4">
-          <h2 id="recent-heading" className="text-xl font-semibold tracking-tight">
-            최근 게시글
+          <h2 id="popular-heading" className="text-xl font-semibold tracking-tight">
+            인기 글
           </h2>
           <Link href="/posts/" className="text-sm text-muted hover:text-foreground">
             전체 보기
           </Link>
         </div>
-        {recentPosts.length > 0 ? (
+        {popularPosts.length > 0 ? (
           <div>
-            {recentPosts.map((post) => (
+            {popularPosts.map((post) => (
               <PostCard key={post.slug} post={post} />
             ))}
           </div>
         ) : (
-          <p className="text-muted">아직 게시글이 없습니다.</p>
+          <p className="text-muted">인기 글로 지정된 게시글이 없습니다.</p>
         )}
       </section>
 

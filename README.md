@@ -21,6 +21,7 @@ npm run dev
 - 이미지는 `public/images/`에 넣고 `/images/파일명`으로 참조합니다.
 - `_`로 시작하는 파일(`_template.md`)은 게시글로 취급하지 않습니다.
 - `draft: true`인 글은 목록·상세에 나오지 않습니다. 공개할 때 `draft: false`로 바꿉니다.
+- 메인(홈) **인기 글** 순서는 frontmatter `popularRank`(숫자, **클수록 위**)로 지정합니다. 새 인기 글은 기존보다 큰 숫자만 주면 됩니다. `/posts`는 계속 최신순입니다.
 
 ## 빌드
 

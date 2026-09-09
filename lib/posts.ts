@@ -21,6 +21,8 @@ export type Post = {
   tags: string[];
   category: string;
   categorySlug: CategorySlug;
+  /** 메인(홈) 인기 글 순위. 클수록 위. 없으면 홈 인기 목록에 안 나옴. */
+  popularRank: number | null;
   draft: boolean;
   content: string;
 };
@@ -59,6 +61,13 @@ function parsePost(slug: string, fileContents: string): Post {
   const categoryValue = typeof data.category === "string" ? data.category : "etc";
   const category = getCategoryByNameOrSlug(categoryValue);
 
+  const popularRank =
+    typeof data.popularRank === "number" &&
+    Number.isFinite(data.popularRank) &&
+    data.popularRank > 0
+      ? data.popularRank
+      : null;
+
   return {
     slug,
     title: data.title,
@@ -67,6 +76,7 @@ function parsePost(slug: string, fileContents: string): Post {
     tags,
     category: category?.name ?? "etc",
     categorySlug: category?.slug ?? "etc",
+    popularRank,
     draft: data.draft === true,
     content,
   };
@@ -94,6 +104,17 @@ export function getAllPosts(options?: { includeDrafts?: boolean }): Post[] {
   return posts
     .filter((post) => showDrafts || !post.draft)
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+}
+
+/** 메인 홈용. `popularRank`가 있는 글만, 순위 내림차순(큰 수가 가장 위). */
+export function getPopularPosts(options?: { includeDrafts?: boolean }): Post[] {
+  return getAllPosts(options)
+    .filter((post) => post.popularRank !== null)
+    .sort((a, b) => {
+      const rankDiff = (b.popularRank as number) - (a.popularRank as number);
+      if (rankDiff !== 0) return rankDiff;
+      return new Date(b.date).getTime() - new Date(a.date).getTime();
+    });
 }
 
 export function getPostBySlug(slug: string): Post {
