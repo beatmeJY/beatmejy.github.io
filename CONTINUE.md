@@ -1,8 +1,6 @@
 ---
-updated: 2026-09-08
-open:
-  - path: content/posts/minimizing-uuid-duplicates.md
-    note: UUID 중복 최소화 글 본문 작성 (draft 유지)
+updated: 2026-09-09
+open: []
 ---
 
 # 이어서 할 일
@@ -13,14 +11,13 @@ open:
 
 ## 다음에 할 일
 
-- `minimizing-uuid-duplicates.md` 본문 채우기 (문제·원인·해결·배운 점)
-- 공개 시 `draft: false`로 전환
+- (작성 중인 글 없음 — 새 글/기능 작업부터 시작하면 됨)
 
 ## 작성 중 (WIP)
 
-- `content/posts/minimizing-uuid-duplicates.md` — 템플릿 초안만 있음, `draft: true`
+- 없음
 
 ## 오늘 한 일
 
-- UUID 중복 최소화 글 초안 파일 생성 (`draft: true`)
-- 작업 시작으로 원격 싱크·CONTINUE 브리핑 확인
+- UUID 초안을 `session-id-lesson-predictability-over-collision.md`로 재작성·공개 (`draft: false`, date 2026-02-10)
+- 기존 글들에서 frontmatter와 중복되던 본문 H1 제거 (bufferedReader / retrospective / circuitBreaker)

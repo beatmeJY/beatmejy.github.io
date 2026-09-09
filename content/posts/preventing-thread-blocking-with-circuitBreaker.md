@@ -10,8 +10,6 @@ tags:
 draft: false
 ---
 
-# 서킷브레이커로 스레드 풀 고갈 장애를 막아보자 (Resilience4j)
-
 주문 데이터를 여러 하위 서버에 전달하는 배치 로직을 비동기로 전환한 지 한 달쯤 됐을 때, 협력 중이던 하위 서버 하나가 다운되면서 우리 서버의 스레드 풀까지 함께 고갈되는 사고가 있었다. 하위 서버가 죽었는데 왜 우리 서버까지 영향을 받았는지, 그리고 이걸 근본적으로 해결하기 위해 어떠한 작업을 했었는지 기록하려고 한다.
 
 관련 문서: [Resilience4j CircuitBreaker 공식 문서](https://resilience4j.readme.io/docs/circuitbreaker)

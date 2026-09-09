@@ -9,8 +9,6 @@ tags:
 draft: false
 ---
 
-# 자바 BufferedReader.ready() 사용해도 괜찮을까?
-
 토이 프로젝트에서 Socket의 `InputStream`을 `BufferedReader`로 감싸 HTTP 메시지를 읽어오다가 겪었던 실수를 정리한다. `ready()`를 "읽을 데이터가 있는지 확인하는 메서드"로 오해하고 사용했다가, 데이터가 있는데도 없다고 판단해버리는 버그를 만들었다.
 
 관련 문서: [Oracle BufferedReader 공식 문서](https://docs.oracle.com/javase/8/docs/api/java/io/BufferedReader.html)
