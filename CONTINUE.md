@@ -12,6 +12,7 @@ open: []
 ## 다음에 할 일
 
 - (작성 중인 글 없음 — 새 글/기능 작업부터 시작하면 됨)
+- Google Search Console: 배포 반영 후 소유권 확인·`sitemap.xml` 제출
 
 ## 작성 중 (WIP)
 
@@ -19,5 +20,6 @@ open: []
 
 ## 오늘 한 일
 
-- UUID 초안을 `session-id-lesson-predictability-over-collision.md`로 재작성·공개 (`draft: false`, date 2026-02-10)
-- 기존 글들에서 frontmatter와 중복되던 본문 H1 제거 (bufferedReader / retrospective / circuitBreaker)
+- 홈 인기 글(`popularRank`, 큰 수일수록 위) + 서킷브레이커 글 공개
+- Google Search Console 인증 메타 추가
+- Redisson 분산 락·MultiLock 글 작성·공개 (`draft: false`, date 2025-01-19, `popularRank: 2`)
