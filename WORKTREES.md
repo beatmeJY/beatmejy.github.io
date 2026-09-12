@@ -17,6 +17,23 @@
 - 작업 시작 시 각자 worktree에서 `git fetch` 후 `main`을 fast-forward merge(또는 rebase)해 맞춘다.
 - 끝나면 feature → `main` PR 또는 `main`에서 merge 후 push.
 
+## 로컬 dev 포트
+
+두 worktree에서 동시에 `npm run dev`하면 기본 3000이 충돌한다. `scripts/dev.mjs`가 **브랜치(우선)·디렉터리명**으로 기본 포트를 나누고, 점유/`EADDRINUSE`(선점 레이스 포함)면 다음 빈 포트로 재시도한다.
+
+| 브랜치 / worktree | 기본 포트 |
+| --- | --- |
+| `main` / `beatmejy.github.io` | 3000 |
+| `feature/cursor-work` / `beatmejy-cursor` | 3001 |
+| `feature/claude-work` / `beatmejy-claude` | 3002 |
+| 그 외 | 3100부터 |
+
+포트 선택 로직 검증: `npm run test:dev-port`
+
+## PR 리뷰 신원
+
+Cursor·Claude 리뷰가 같은 개인 GitHub 계정으로 보이지 않게, 에이전트별 봇 계정 PAT로만 코멘트한다. → [`docs/AGENT-GITHUB-IDENTITIES.md`](./docs/AGENT-GITHUB-IDENTITIES.md)
+
 ## 다시 만들기
 
 ```bash

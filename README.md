@@ -9,7 +9,16 @@ npm install
 npm run dev
 ```
 
-[http://localhost:3000](http://localhost:3000)에서 확인합니다.
+`npm run dev`는 **브랜치**로 기본 포트를 정하고(폴더명은 보조), 점유/`EADDRINUSE`면 다음 빈 포트로 재시도합니다.
+
+| 브랜치 / 디렉터리 | 기본 포트 |
+| --- | --- |
+| `main` / `beatmejy.github.io` | 3000 |
+| `feature/cursor-work` / `beatmejy-cursor` | 3001 |
+| `feature/claude-work` / `beatmejy-claude` | 3002 |
+| 그 외 | 3100부터 |
+
+시작 시 터미널에 실제 URL이 출력됩니다. `PORT=4010 npm run dev`로 강제할 수 있습니다.
 
 정적보내기 결과는 `npm run build` 후 `npm run preview`로 확인합니다. `output: "export"`라서 `npm start`(`next start`)는 사용할 수 없습니다.
 
@@ -40,3 +49,5 @@ npm run build
 사이트 URL은 `lib/site.ts`의 `siteConfig.url`에서 바꿉니다.
 
 에이전트별 병렬 작업(Cursor / Claude)은 git worktree를 쓴다. → [`WORKTREES.md`](./WORKTREES.md)
+
+PR 코드리뷰는 개인 계정이 아니라 Cursor/Claude 전용 GitHub 계정으로 남긴다. → [`docs/AGENT-GITHUB-IDENTITIES.md`](./docs/AGENT-GITHUB-IDENTITIES.md)

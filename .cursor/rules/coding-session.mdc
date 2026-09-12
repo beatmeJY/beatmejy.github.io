@@ -23,6 +23,7 @@ alwaysApply: true
 2. `CONTINUE.md`를 읽고 `## 오늘 한 일` / `## 다음에 할 일` / `## 작성 중 (WIP)` / `open`을 사용자에게 **한국어로 짧게 브리핑**한다.
 3. frontmatter `open`에 경로가 있으면 해당 파일을 Read로 연다. 없으면 `CONTINUE.md`만 연다.
 4. 필요하면 `node .cursor/hooks/sync-on-open.mjs`로 sync 상태를 갱신한다.
+5. **Agent B 의무:** `feature/claude-work` open PR이 있으면 `.cursor/rules/agent-b-peer-review.mdc`에 따라 GitHub 코드리뷰를 남긴다(이미 같은 HEAD를 리뷰했으면 스킵).
 
 ## 사용자가 "작업 종료" / "코딩종료" / "코딩 종료"라고 하면
 
