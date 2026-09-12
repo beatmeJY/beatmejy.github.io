@@ -38,3 +38,5 @@ npm run build
 3. `main`에 푸시하면 `.github/workflows/deploy.yml`이 `out/`을 배포합니다.
 
 사이트 URL은 `lib/site.ts`의 `siteConfig.url`에서 바꿉니다.
+
+에이전트별 병렬 작업(Cursor / Claude)은 git worktree를 쓴다. → [`WORKTREES.md`](./WORKTREES.md)
