@@ -184,43 +184,62 @@ NIT는 특별한 이유가 없다면
 
 ## 9. Review Format
 
-리뷰 의견은 다음 형식을 사용한다.
+리뷰는 필드를 한 줄씩 나열하는 텍스트 블록이 아니라, **GitHub에서 바로 읽히는 마크다운**으로 작성한다.
+제목에 심각도와 문제를 한 줄로 요약하고, 위치는 인라인 코드로, 본문은 필요한 만큼만 짧게 쓴다.
+빈 라벨(`문제:`, `이유:` 등)을 줄줄이 나열하지 않는다 — 없는 항목은 그냥 생략한다.
 
+### 심각도 표시
+
+| 표시 | 의미 | 대응 |
+| --- | --- | --- |
+| 🔴 **BLOCKER** | 반드시 수정해야 하는 문제 | 머지 전 수정 필수 |
+| 🟠 **SHOULD_FIX** | 합리적으로 고치는 게 나은 문제 | 권장, 강제 아님 |
+| 🔵 **QUESTION** | 기술적으로 어느 쪽도 가능, 사람 판단 필요 | HUMAN DECISION으로 이관 |
+| ⚪ **NIT** | 사소한 스타일/취향 | 언급만, 수정 요구 안 함 |
+
+### 항목 하나의 형식
+
+제목(`####`)에 아이콘 + 심각도 + 문제를 한 문장으로. 그 아래 위치, 그리고 필요한 내용만 불릿으로.
+
+```markdown
+#### 🔴 BLOCKER — 동시 실행 시 포트 선점 race condition
+
+**`scripts/dev-port.mjs:45`**
+
+포트가 비었는지 확인(check)하고 실제로 그 포트를 점유(act)하기까지 시간차가 있어,
+두 프로세스가 거의 동시에 실행되면 동일 포트를 놓고 경쟁한다.
+
+- **발생 조건**: 두 worktree가 같은 preferred 포트로 거의 동시에 `npm run dev` 실행
+- **검증**: 동시 실행 8회 중 4회 `EADDRINUSE` 재현
+- **권장 해결**: bind할 때까지 소켓을 점유한 채로 넘기거나, 실패 시 다음 포트로 재시도하는 루프 추가
 ```
-[BLOCKER]
-파일:
-라인:
-문제:
-왜 문제인가:
-발생 조건:
-권장 해결 방향:
 
-[SHOULD_FIX]
-파일:
-라인:
-문제:
-이유:
-권장 해결 방향:
+BLOCKER처럼 "왜 문제인지"와 "발생 조건"이 리뷰받는 사람에게 바로 안 와닿을 수 있는 항목만
+불릿을 채워 넣고, SHOULD_FIX/QUESTION/NIT처럼 한두 문장으로 끝나는 항목은 제목과 본문 한 단락으로 충분하다.
 
-[QUESTION]
-주제:
-선택지:
-각 선택의 Trade-off:
-사람이 결정해야 하는 이유:
+### 리뷰 마무리
+
+항목이 하나라도 있으면 구분선(`---`) 아래에 요약 표와 결과를 붙인다. 항목이 전혀 없으면
+(문제 없음) 이 표 없이 `REVIEW RESULT: APPROVE`만 짧게 남긴다.
+
+```markdown
+---
+
+### 요약
+
+| 심각도 | 개수 |
+| --- | --- |
+| 🔴 BLOCKER | 1 |
+| 🟠 SHOULD_FIX | 1 |
+| 🔵 QUESTION | 1 |
+
+**REVIEW RESULT:** CHANGES REQUIRED
+
+**HUMAN DECISIONS**
+- (사람이 직접 판단해야 하는 내용만. 없으면 `NONE`)
 ```
 
-마지막에는 반드시 다음을 작성한다.
-
-```
-REVIEW RESULT:
-- APPROVE
-- CHANGES REQUIRED
-- NEEDS HUMAN DECISION
-
-HUMAN DECISIONS:
-- 사람이 직접 판단해야 하는 내용만 작성
-- 없다면 NONE
-```
+`REVIEW RESULT`는 `APPROVE` / `CHANGES REQUIRED` / `NEEDS HUMAN DECISION` 중 하나다.
 
 ## 10. Design Comparison
 
