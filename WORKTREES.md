@@ -19,15 +19,20 @@
 
 ## 로컬 dev 포트
 
-두 worktree에서 동시에 `npm run dev`하면 기본 3000이 충돌한다. `scripts/dev.mjs`가 디렉터리명으로 기본 포트를 나누고, 점유 시 다음 빈 포트로 넘긴다.
+두 worktree에서 동시에 `npm run dev`하면 기본 3000이 충돌한다. `scripts/dev.mjs`가 **브랜치(우선)·디렉터리명**으로 기본 포트를 나누고, 점유/`EADDRINUSE`(선점 레이스 포함)면 다음 빈 포트로 재시도한다.
 
-| worktree | 기본 포트 |
+| 브랜치 / worktree | 기본 포트 |
 | --- | --- |
-| `beatmejy.github.io` | 3000 |
-| `beatmejy-cursor` | 3001 |
-| `beatmejy-claude` | 3002 |
+| `main` / `beatmejy.github.io` | 3000 |
+| `feature/cursor-work` / `beatmejy-cursor` | 3001 |
+| `feature/claude-work` / `beatmejy-claude` | 3002 |
+| 그 외 | 3100부터 |
 
 포트 선택 로직 검증: `npm run test:dev-port`
+
+## PR 리뷰 신원
+
+Cursor·Claude 리뷰가 같은 개인 GitHub 계정으로 보이지 않게, 에이전트별 봇 계정 PAT로만 코멘트한다. → [`docs/AGENT-GITHUB-IDENTITIES.md`](./docs/AGENT-GITHUB-IDENTITIES.md)
 
 ## 다시 만들기
 
