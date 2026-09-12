@@ -65,3 +65,15 @@ gh api repos/beatmeJY/beatmejy.github.io/pulls/<N>/reviews --jq '.[] | {user:.us
    4. 두 구현 중 어떤 설계가 더 합리적인지
 
 실행하지 않은 테스트를 통과했다고 쓰지 않는다. Agent A 브랜치를 직접 수정하지 않는다.
+
+## 계정 역할 (절대 혼동 금지)
+
+| 행위 | GitHub 계정 |
+| --- | --- |
+| Agent B 코드리뷰 코멘트 | `@beatmejy-cursor` (`scripts/agent-pr-comment.mjs --agent cursor`) |
+| Agent A 코드리뷰 코멘트 | `@beatmejy-claude` |
+| **사람(지율) 의견·결정·지시 전달 코멘트** | **`@beatmeJY` (`beatmejy@gmail.com`)** |
+| **PR 머지** | **`@beatmeJY`만** |
+
+사람이 “내 의견으로 댓글 달아”, “머지해”, “완료로 남긴다”고 하면 `gh auth switch --user beatmeJY` 후 개인 계정으로만 수행한다.
+에이전트 봇 계정으로 사람 의견/머지를 절대 대리하지 않는다.
