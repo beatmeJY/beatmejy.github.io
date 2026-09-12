@@ -9,7 +9,15 @@ npm install
 npm run dev
 ```
 
-[http://localhost:3000](http://localhost:3000)에서 확인합니다.
+`npm run dev`는 worktree마다 기본 포트를 다르게 잡고, 점유 중이면 다음 빈 포트로 올립니다.
+
+| 디렉터리 | 기본 포트 |
+| --- | --- |
+| `beatmejy.github.io` | 3000 |
+| `beatmejy-cursor` | 3001 |
+| `beatmejy-claude` | 3002 |
+
+시작 시 터미널에 실제 URL이 출력됩니다. `PORT=4010 npm run dev`로 강제할 수 있습니다.
 
 정적보내기 결과는 `npm run build` 후 `npm run preview`로 확인합니다. `output: "export"`라서 `npm start`(`next start`)는 사용할 수 없습니다.
 

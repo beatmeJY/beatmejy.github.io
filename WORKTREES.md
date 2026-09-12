@@ -17,6 +17,18 @@
 - 작업 시작 시 각자 worktree에서 `git fetch` 후 `main`을 fast-forward merge(또는 rebase)해 맞춘다.
 - 끝나면 feature → `main` PR 또는 `main`에서 merge 후 push.
 
+## 로컬 dev 포트
+
+두 worktree에서 동시에 `npm run dev`하면 기본 3000이 충돌한다. `scripts/dev.mjs`가 디렉터리명으로 기본 포트를 나누고, 점유 시 다음 빈 포트로 넘긴다.
+
+| worktree | 기본 포트 |
+| --- | --- |
+| `beatmejy.github.io` | 3000 |
+| `beatmejy-cursor` | 3001 |
+| `beatmejy-claude` | 3002 |
+
+포트 선택 로직 검증: `npm run test:dev-port`
+
 ## 다시 만들기
 
 ```bash
