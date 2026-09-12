@@ -1,0 +1,30 @@
+---
+description: Agent A는 Agent B PR을 감지해 Claude 전용 GitHub 계정으로 코드리뷰를 남긴다
+alwaysApply: false
+---
+
+# Agent A → Agent B PR 코드리뷰 (Claude worktree용)
+
+이 규칙은 Claude worktree(`beatmejy-claude`, Agent A)에서 켠다.
+리뷰 코멘트는 **반드시** Claude 전용 GitHub 계정으로만 남긴다.
+
+## 대상
+
+```bash
+gh pr list --repo beatmeJY/beatmejy.github.io --state open \
+  --head feature/cursor-work \
+  --json number,title,url,headRefName,updatedAt
+```
+
+## 게시 (개인 계정 금지)
+
+`gh pr comment`를 직접 쓰지 않는다.
+
+```bash
+node scripts/agent-pr-comment.mjs --agent claude --pr <N> --body-file /tmp/review.md
+```
+
+토큰 설정: `docs/AGENT-GITHUB-IDENTITIES.md`
+
+본문 상단 마커: `<!-- agent-a-review -->` (스크립트가 자동 삽입).
+AGENTS.md 리뷰 형식·4항목 보고를 따른다. NIT·취향 금지.
