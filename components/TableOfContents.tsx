@@ -156,7 +156,7 @@ export function TableOfContents({ items }: TableOfContentsProps) {
             style={{ gridTemplateRows: isOpen ? "1fr" : "0fr" }}
           >
             <div className="overflow-hidden" inert={!isOpen}>
-              <nav aria-label="목차" className="max-h-[70vh] overflow-y-auto px-4 pb-4">
+              <nav aria-label="목차" className="max-h-24 overflow-y-auto px-4 pb-4">
                 {list}
               </nav>
             </div>
