@@ -172,7 +172,7 @@ export function TableOfContents({ items }: TableOfContentsProps) {
     <>
       {/* xl 미만: 화면 상단에 붙어서 스크롤해도 따라오는 접이식 목차 */}
       <div ref={sentinelRef} className="h-0 xl:hidden" aria-hidden="true" />
-      <div className="sticky top-0 z-40 mb-8 xl:hidden">
+      <div className="sticky top-2 z-40 mb-8 xl:hidden">
         <div
           className={`overflow-hidden rounded-xl border bg-surface/80 backdrop-blur-md transition-[box-shadow,border-color] duration-300 ease-out ${
             isStuck
