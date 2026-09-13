@@ -95,12 +95,12 @@ export function TableOfContents({ items }: TableOfContentsProps) {
 
   return (
     <>
-      {/* xl 미만: 본문 위 접이식 목차 */}
-      <details className="mb-8 rounded-lg border border-border bg-surface p-4 xl:hidden">
+      {/* xl 미만: 화면 상단에 붙어서 스크롤해도 따라오는 접이식 목차 */}
+      <details className="sticky top-0 z-40 mb-8 rounded-lg border border-border bg-surface/95 p-4 shadow-sm backdrop-blur xl:hidden">
         <summary className="cursor-pointer text-sm font-semibold text-foreground">
           목차
         </summary>
-        <nav aria-label="목차" className="mt-3">
+        <nav aria-label="목차" className="mt-3 max-h-[70vh] overflow-y-auto">
           {list}
         </nav>
       </details>
