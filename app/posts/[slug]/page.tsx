@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { Markdown } from "@/components/Markdown";
+import { TableOfContents } from "@/components/TableOfContents";
+import { renderMarkdown } from "@/lib/markdown";
 import { getAllSlugs, getPostBySlug } from "@/lib/posts";
 import { formatDate, siteConfig, slugifyTag } from "@/lib/site";
 
@@ -64,6 +66,8 @@ export default async function PostPage({ params }: PostPageProps) {
     notFound();
   }
 
+  const { html, toc } = await renderMarkdown(post.content);
+
   return (
     <article>
       <header className="border-b border-border pb-8">
@@ -94,8 +98,9 @@ export default async function PostPage({ params }: PostPageProps) {
           </ul>
         ) : null}
       </header>
+      <TableOfContents key={post.slug} items={toc} />
       <div className="pt-8">
-        <Markdown content={post.content} />
+        <Markdown html={html} />
       </div>
     </article>
   );
