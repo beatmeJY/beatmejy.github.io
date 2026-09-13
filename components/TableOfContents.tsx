@@ -247,7 +247,7 @@ export function TableOfContents({ items }: TableOfContentsProps) {
             <div className="overflow-hidden" inert={!isOpen}>
               <nav
                 aria-label="목차"
-                className="max-h-24 overflow-y-auto px-4 pb-4 [scrollbar-gutter:stable]"
+                className="toc-scroll max-h-24 overflow-y-auto px-4 pb-4 [scrollbar-gutter:stable]"
               >
                 {list}
               </nav>
@@ -259,7 +259,7 @@ export function TableOfContents({ items }: TableOfContentsProps) {
       {/* xl 이상: 오른쪽 여백 사이드바 */}
       <nav
         aria-label="목차"
-        className="hidden [scrollbar-gutter:stable] xl:fixed xl:top-24 xl:block xl:w-48 xl:overflow-y-auto"
+        className="toc-scroll hidden [scrollbar-gutter:stable] xl:fixed xl:top-24 xl:block xl:w-48 xl:overflow-y-auto"
         style={{
           left: "calc(50% + 25.5rem)",
           maxHeight: desktopMaxHeightPx !== null ? `${desktopMaxHeightPx}px` : "calc(100vh - 8rem)",
