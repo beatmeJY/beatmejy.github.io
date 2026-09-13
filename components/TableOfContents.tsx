@@ -121,8 +121,9 @@ export function TableOfContents({ items }: TableOfContentsProps) {
       const isBelow = linkRect.bottom > containerRect.bottom;
 
       if (isAbove || isBelow) {
-        container.scrollTop +=
+        const delta =
           linkRect.top - containerRect.top - container.clientHeight / 2 + linkRect.height / 2;
+        container.scrollTo({ top: container.scrollTop + delta, behavior: "smooth" });
       }
     });
   }, [activeId]);
