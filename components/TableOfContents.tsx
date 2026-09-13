@@ -14,6 +14,10 @@ type TableOfContentsProps = {
  *   1280px에서 여백이 정확히 얼마나 남는지 계산해 폭·간격을 잡았다:
  *     본문 절반 24rem + 간격 1.5rem + 목차 폭 12rem = 37.5rem(600px) 지점에서 끝남
  *     1280px 뷰포트의 절반(640px) + 600px = 1240px < 1280px → 40px 여유
+ *   목차가 길어 스크롤이 생기면 `position: fixed`라 글 길이와 무관하게 화면에 계속 떠
+ *   있는데, 글이 짧으면 그 사이 푸터가 뷰포트로 올라와 겹칠 수 있다. footer의 실제 위치를
+ *   계속 측정해서 max-height를 동적으로 좁혀 푸터 앞에서 멈추게 한다. 스크롤바가 생겼다
+ *   안 생겼다 하면서 폭이 흔들리는 것도 `scrollbar-gutter: stable`로 자리 예약해 막는다.
  * - xl 미만(태블릿·모바일): 사이드에 띄울 여백이 없으므로, 화면 상단에 sticky로 붙는 접이식
  *   막대로 노출한다. 스크롤에 실제로 달라붙었는지는 높이 0짜리 sentinel을 관찰해서 판단하고,
  *   그 순간에만 그림자·블러를 살짝 키워 "떠 있다"는 느낌을 준다. 펼침/접힘은 네이티브
@@ -33,6 +37,7 @@ export function TableOfContents({ items }: TableOfContentsProps) {
   const [activeId, setActiveId] = useState<string | null>(items[0]?.id ?? null);
   const [isOpen, setIsOpen] = useState(true);
   const [isStuck, setIsStuck] = useState(false);
+  const [desktopMaxHeightPx, setDesktopMaxHeightPx] = useState<number | null>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -95,6 +100,38 @@ export function TableOfContents({ items }: TableOfContentsProps) {
     observer.observe(sentinel);
 
     return () => observer.disconnect();
+  }, []);
+
+  // 데스크톱 사이드바는 xl:top-24(6rem=96px)에 fixed로 붙어있어서, 기본값(뷰포트 높이 기준
+  // max-height)만으로는 글이 짧아 푸터가 뷰포트 안으로 올라오는 순간 목차가 푸터 위에
+  // 그대로 겹친다. footer의 실제 위치를 계속 측정해서, 푸터가 다가오면 그 앞에서 멈추도록
+  // max-height를 동적으로 좁힌다.
+  useEffect(() => {
+    const TOP_OFFSET_PX = 96; // xl:top-24
+    const BOTTOM_GAP_PX = 32;
+
+    function updateDesktopMaxHeight() {
+      const footer = document.querySelector("footer");
+      const viewportLimit = window.innerHeight - TOP_OFFSET_PX - BOTTOM_GAP_PX;
+
+      if (!footer) {
+        setDesktopMaxHeightPx(viewportLimit);
+        return;
+      }
+
+      const footerLimit = footer.getBoundingClientRect().top - TOP_OFFSET_PX - BOTTOM_GAP_PX;
+      setDesktopMaxHeightPx(Math.max(0, Math.min(viewportLimit, footerLimit)));
+    }
+
+    updateDesktopMaxHeight();
+
+    window.addEventListener("scroll", updateDesktopMaxHeight, { passive: true });
+    window.addEventListener("resize", updateDesktopMaxHeight);
+
+    return () => {
+      window.removeEventListener("scroll", updateDesktopMaxHeight);
+      window.removeEventListener("resize", updateDesktopMaxHeight);
+    };
   }, []);
 
   // 데스크톱 사이드바(전체 표시)와 달리 모바일 목차는 3줄 높이로 잘려 자체 스크롤이 있다.
@@ -208,7 +245,10 @@ export function TableOfContents({ items }: TableOfContentsProps) {
             style={{ gridTemplateRows: isOpen ? "1fr" : "0fr" }}
           >
             <div className="overflow-hidden" inert={!isOpen}>
-              <nav aria-label="목차" className="max-h-24 overflow-y-auto px-4 pb-4">
+              <nav
+                aria-label="목차"
+                className="max-h-24 overflow-y-auto px-4 pb-4 [scrollbar-gutter:stable]"
+              >
                 {list}
               </nav>
             </div>
@@ -219,8 +259,11 @@ export function TableOfContents({ items }: TableOfContentsProps) {
       {/* xl 이상: 오른쪽 여백 사이드바 */}
       <nav
         aria-label="목차"
-        className="hidden xl:fixed xl:top-24 xl:block xl:w-48 xl:max-h-[calc(100vh-8rem)] xl:overflow-y-auto"
-        style={{ left: "calc(50% + 25.5rem)" }}
+        className="hidden [scrollbar-gutter:stable] xl:fixed xl:top-24 xl:block xl:w-48 xl:overflow-y-auto"
+        style={{
+          left: "calc(50% + 25.5rem)",
+          maxHeight: desktopMaxHeightPx !== null ? `${desktopMaxHeightPx}px` : "calc(100vh - 8rem)",
+        }}
       >
         <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-muted">
           목차
