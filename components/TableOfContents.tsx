@@ -100,32 +100,42 @@ export function TableOfContents({ items }: TableOfContentsProps) {
   // 데스크톱 사이드바(전체 표시)와 달리 모바일 목차는 3줄 높이로 잘려 자체 스크롤이 있다.
   // 페이지를 스크롤해 activeId가 바뀌어도 그 항목이 목차의 스크롤 영역 밖에 있으면 안 보이므로,
   // 매번 그 링크가 보이도록 (페이지 스크롤은 건드리지 않고) nav 내부 scrollTop만 옮겨준다.
+  //
+  // 목차 링크를 클릭해 멀리 떨어진 섹션으로 점프하면, 페이지가 부드럽게 스크롤되는 동안
+  // 지나쳐가는 중간 제목마다 activeId가 계속 바뀐다. 그때마다 즉시 목차 스크롤을 옮기면
+  // 서로 다른 목적지를 향해 애니메이션이 계속 끊기고 다시 시작해 오히려 흔들려 보인다.
+  // 그래서 살짝 디바운스해서, 스크롤이 멈추고 activeId가 잠시 안정된 뒤 한 번만 부드럽게
+  // 정리한다.
   useEffect(() => {
     if (!activeId) {
       return;
     }
 
-    const links = document.querySelectorAll<HTMLAnchorElement>(
-      `nav[aria-label="목차"] a[href="#${CSS.escape(activeId)}"]`,
-    );
+    const timer = window.setTimeout(() => {
+      const links = document.querySelectorAll<HTMLAnchorElement>(
+        `nav[aria-label="목차"] a[href="#${CSS.escape(activeId)}"]`,
+      );
 
-    links.forEach((link) => {
-      const container = link.closest("nav");
-      if (!container) {
-        return;
-      }
+      links.forEach((link) => {
+        const container = link.closest("nav");
+        if (!container) {
+          return;
+        }
 
-      const containerRect = container.getBoundingClientRect();
-      const linkRect = link.getBoundingClientRect();
-      const isAbove = linkRect.top < containerRect.top;
-      const isBelow = linkRect.bottom > containerRect.bottom;
+        const containerRect = container.getBoundingClientRect();
+        const linkRect = link.getBoundingClientRect();
+        const isAbove = linkRect.top < containerRect.top;
+        const isBelow = linkRect.bottom > containerRect.bottom;
 
-      if (isAbove || isBelow) {
-        const delta =
-          linkRect.top - containerRect.top - container.clientHeight / 2 + linkRect.height / 2;
-        container.scrollTo({ top: container.scrollTop + delta, behavior: "smooth" });
-      }
-    });
+        if (isAbove || isBelow) {
+          const delta =
+            linkRect.top - containerRect.top - container.clientHeight / 2 + linkRect.height / 2;
+          container.scrollTo({ top: container.scrollTop + delta, behavior: "smooth" });
+        }
+      });
+    }, 150);
+
+    return () => window.clearTimeout(timer);
   }, [activeId]);
 
   if (items.length === 0) {
