@@ -31,7 +31,6 @@ export function TableOfContents({ items }: TableOfContentsProps) {
   const [activeId, setActiveId] = useState<string | null>(items[0]?.id ?? null);
   const [isOpen, setIsOpen] = useState(false);
   const [isStuck, setIsStuck] = useState(false);
-  const visibleIdsRef = useRef<Set<string>>(new Set());
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -47,17 +46,22 @@ export function TableOfContents({ items }: TableOfContentsProps) {
       return;
     }
 
+    // effect 안의 지역 변수로 둔다 — useRef로 컴포넌트 생애 전체에 걸쳐 공유하면,
+    // React StrictMode(개발 모드)가 effect를 두 번 실행할 때 이전 실행의 관찰 상태가
+    // 새 observer로 넘어와 뒤섞인다. 매 effect 실행마다 완전히 새로 시작해야 한다.
+    const visibleIds = new Set<string>();
+
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting) {
-            visibleIdsRef.current.add(entry.target.id);
+            visibleIds.add(entry.target.id);
           } else {
-            visibleIdsRef.current.delete(entry.target.id);
+            visibleIds.delete(entry.target.id);
           }
         }
 
-        const stillVisible = items.filter((item) => visibleIdsRef.current.has(item.id));
+        const stillVisible = items.filter((item) => visibleIds.has(item.id));
         if (stillVisible.length > 0) {
           setActiveId(stillVisible[0].id);
         }
