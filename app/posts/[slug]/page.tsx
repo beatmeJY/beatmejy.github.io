@@ -98,10 +98,10 @@ export default async function PostPage({ params }: PostPageProps) {
           </ul>
         ) : null}
       </header>
+      <TableOfContents key={post.slug} items={toc} />
       <div className="pt-8">
         <Markdown html={html} />
       </div>
-      <TableOfContents items={toc} />
     </article>
   );
 }
