@@ -8,7 +8,7 @@
     "start": "next start",
     "preview": "npx --yes serve@latest out",
     "lint": "eslint",
-    "test:dev-port": "node --test scripts/dev-port.test.mjs"
+    "test:dev-port": "node --test scripts/dev-port.test.mjs scripts/dev-favicon.test.mjs"
   },
   "dependencies": {
     "gray-matter": "^4.0.3",

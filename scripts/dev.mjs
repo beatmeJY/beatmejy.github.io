@@ -4,11 +4,13 @@
  * - 브랜치/worktree별 기본 포트
  * - 점유·EADDRINUSE면 다음 포트로 재시도 (check-then-act 레이스 보완)
  * - PORT 환경변수로 강제 지정 가능
+ * - Cursor/Claude 탭 파비콘용 app/icon.* 설치·종료 시 원복
  */
 import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { installDevAppIcon, restoreDevAppIcon } from "./dev-favicon.mjs";
 import { nextPortAfter, resolveDevAgent, resolveDevPort } from "./dev-port.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -41,7 +43,7 @@ function runNextDev(port, agent) {
         env: {
           ...process.env,
           PORT: String(port),
-          // layout이 탭 favicon·제목 접두사를 worktree별로 고를 때 사용
+          // layout이 탭 제목 접두사를 worktree별로 고를 때 사용
           DEV_AGENT: agent,
         },
       },
@@ -82,6 +84,27 @@ async function main() {
   }
 
   const agent = resolveDevAgent(root);
+  const iconNote = installDevAppIcon(root, agent);
+  const restore = () => {
+    try {
+      restoreDevAppIcon(root);
+    } catch (err) {
+      console.error(
+        "[dev] favicon restore failed:",
+        err instanceof Error ? err.message : err,
+      );
+    }
+  };
+  process.on("exit", restore);
+  process.on("SIGINT", () => {
+    restore();
+    process.exit(130);
+  });
+  process.on("SIGTERM", () => {
+    restore();
+    process.exit(143);
+  });
+
   let { preferred, port, redirected } = await resolveDevPort(root);
   if (redirected) {
     console.log(
@@ -90,6 +113,7 @@ async function main() {
   }
 
   console.log(`[dev] worktree agent: ${agent}`);
+  console.log(`[dev] tab icon: ${iconNote}`);
 
   for (let attempt = 1; attempt <= MAX_BIND_ATTEMPTS; attempt += 1) {
     console.log(`[dev] using port ${port} (attempt ${attempt}/${MAX_BIND_ATTEMPTS})`);
@@ -97,10 +121,12 @@ async function main() {
 
     const result = await runNextDev(port, agent);
     if (result.signal) {
+      restore();
       process.kill(process.pid, result.signal);
       return;
     }
     if (!result.eaddrinuse) {
+      restore();
       process.exit(result.code ?? 1);
     }
 
@@ -111,6 +137,7 @@ async function main() {
     port = next;
   }
 
+  restore();
   console.error(
     `[dev] failed to bind after ${MAX_BIND_ATTEMPTS} attempts. Set PORT explicitly.`,
   );
@@ -118,6 +145,11 @@ async function main() {
 }
 
 main().catch((err) => {
+  try {
+    restoreDevAppIcon(root);
+  } catch {
+    // ignore
+  }
   console.error("[dev]", err instanceof Error ? err.message : err);
   process.exit(1);
 });

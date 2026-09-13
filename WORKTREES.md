@@ -24,11 +24,11 @@
 | 브랜치 / worktree | 기본 포트 | 로컬 탭 구분 |
 | --- | --- | --- |
 | `main` / `beatmejy.github.io` | 3000 | (기본) |
-| `feature/cursor-work` / `beatmejy-cursor` | 3001 | favicon `public/images/cursor.jpeg`, 제목 `[Cursor]` |
-| `feature/claude-work` / `beatmejy-claude` | 3002 | favicon `public/images/claude.png`, 제목 `[Claude]` |
+| `feature/cursor-work` / `beatmejy-cursor` | 3001 | favicon `public/images/cursor.jpeg`, 제목 앞 `[Cursor]` |
+| `feature/claude-work` / `beatmejy-claude` | 3002 | favicon `public/images/claude.png`, 제목 앞 `[Claude]` |
 | 그 외 | 3100부터 | (기본) |
 
-`npm run dev`가 `DEV_AGENT`를 넘기고, `app/layout.tsx`가 개발 모드에서만 탭 아이콘·제목 접두사를 바꾼다. production 빌드/배포에는 적용되지 않는다.
+`npm run dev`가 `DEV_AGENT`를 넘기고, `app/favicon.ico`를 잠시 치운 뒤 worktree별 `app/icon.*`를 심는다(종료 시 원복). 제목은 템플릿 앞 `[Cursor]`/`[Claude]`. DOM MutationObserver는 쓰지 않는다. production 빌드/배포 아이콘은 기본 `app/favicon.ico`를 유지한다.
 
 포트 선택 로직 검증: `npm run test:dev-port`
 

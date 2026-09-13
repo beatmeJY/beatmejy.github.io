@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
-import { buildDevTabMetadata } from "@/lib/dev-agent";
+import { getDevTabConfig } from "@/lib/dev-agent";
 import { siteConfig } from "@/lib/site";
 import "./globals.css";
 
@@ -16,11 +16,11 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const devTab = buildDevTabMetadata(siteConfig.name);
+const devTab = getDevTabConfig(siteConfig.name);
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
-  title: devTab.title ?? {
+  title: devTab?.title ?? {
     default: siteConfig.name,
     template: `%s · ${siteConfig.name}`,
   },
@@ -50,13 +50,13 @@ export const metadata: Metadata = {
   verification: {
     google: "SbQriMqGAsv-G7kMvmZd1QKXM-QMegGaCrBKRkcvLh0",
   },
-  ...(devTab.icons ? { icons: devTab.icons } : {}),
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
       lang="ko"
+      data-scroll-behavior="smooth"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">

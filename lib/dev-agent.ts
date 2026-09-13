@@ -27,34 +27,43 @@ export function resolveRuntimeDevAgent(): DevAgent | null {
   return WORKTREE_AGENTS[dir] ?? null;
 }
 
-/** 브라우저 탭에서 Cursor / Claude / main을 구분하기 위한 icons·title 접두사 */
-export function buildDevTabMetadata(
-  siteName: string,
-): Pick<Metadata, "icons" | "title"> {
+export type DevTabConfig = {
+  agent: "cursor" | "claude";
+  label: string;
+  iconHref: string;
+  iconType: string;
+  title: Metadata["title"];
+};
+
+/** 브라우저 탭 구분용 설정. main/production이면 null. */
+export function getDevTabConfig(siteName: string): DevTabConfig | null {
   const agent = resolveRuntimeDevAgent();
-  if (!agent || agent === "unknown" || agent === "main") {
-    return {};
+  if (agent !== "cursor" && agent !== "claude") {
+    return null;
   }
 
   if (agent === "cursor") {
     return {
+      agent,
+      label: "Cursor",
+      iconHref: "/images/cursor.jpeg",
+      iconType: "image/jpeg",
+      // 접두사를 앞에 둬서 탭에서 바로 보이게 한다
       title: {
         default: `[Cursor] ${siteName}`,
-        template: `%s · [Cursor] ${siteName}`,
-      },
-      icons: {
-        icon: [{ url: "/images/cursor.jpeg", type: "image/jpeg" }],
+        template: `[Cursor] %s · ${siteName}`,
       },
     };
   }
 
   return {
+    agent,
+    label: "Claude",
+    iconHref: "/images/claude.png",
+    iconType: "image/png",
     title: {
       default: `[Claude] ${siteName}`,
-      template: `%s · [Claude] ${siteName}`,
-    },
-    icons: {
-      icon: [{ url: "/images/claude.png", type: "image/png" }],
+      template: `[Claude] %s · ${siteName}`,
     },
   };
 }

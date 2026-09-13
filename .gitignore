@@ -41,3 +41,10 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local dev tab icons (scripts/dev-favicon.mjs)
+/app/icon.png
+/app/icon.jpeg
+/app/icon.jpg
+/app/icon.ico
+/app/.favicon.ico.dev-hidden
