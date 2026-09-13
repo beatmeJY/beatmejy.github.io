@@ -20,8 +20,10 @@ type TableOfContentsProps = {
  *   `<details>`의 즉시 토글 대신 `grid-template-rows` 트랜지션으로 부드럽게 처리한다
  *   (높이를 미리 몰라도 auto까지 애니메이션되는, JS 없이 CSS만으로 되는 표준적인 방법).
  *
- * 활성 섹션 판정은 뷰포트 상단부에 진입한 제목들을 IntersectionObserver로 추적해
- * 문서 순서상 가장 먼저 있는 항목을 고르는 방식(스크롤 스파이)이다.
+ * 활성 섹션 판정: 스크롤할 때마다 "화면 상단 기준선(120px)보다 위로 올라온 제목 중
+ * 문서 순서상 가장 마지막 것"을 계산해서 고른다. IntersectionObserver로 진입/이탈 이벤트를
+ * 누적하는 방식은 스크롤이 한 번에 크게 튀면(트랙패드 플릭 등) 감시 구간을 건너뛰어 갱신이
+ * 멈출 수 있어서, 매번 실제 위치를 다시 계산하는 이 방식으로 바꿨다 — 건너뛸 여지가 없다.
  *
  * 글이 바뀌면(App Router 클라이언트 내비게이션) 이 컴포넌트가 같은 위치에서 재사용될 수 있어
  * activeId/observer 상태가 이전 글 값으로 남을 수 있다 — 호출하는 쪽에서 `key={slug}`를 줘서
@@ -39,39 +41,44 @@ export function TableOfContents({ items }: TableOfContentsProps) {
     }
 
     const headingElements = items
-      .map((item) => document.getElementById(item.id))
-      .filter((el): el is HTMLElement => el !== null);
+      .map((item) => ({ id: item.id, el: document.getElementById(item.id) }))
+      .filter((h): h is { id: string; el: HTMLElement } => h.el !== null);
 
     if (headingElements.length === 0) {
       return;
     }
 
-    // effect 안의 지역 변수로 둔다 — useRef로 컴포넌트 생애 전체에 걸쳐 공유하면,
-    // React StrictMode(개발 모드)가 effect를 두 번 실행할 때 이전 실행의 관찰 상태가
-    // 새 observer로 넘어와 뒤섞인다. 매 effect 실행마다 완전히 새로 시작해야 한다.
-    const visibleIds = new Set<string>();
+    // "현재 읽는 위치"로 볼 기준선. 화면 상단에서 이보다 위로 올라온(=지나친) 제목 중
+    // 문서 순서상 가장 마지막 것을 활성으로 본다. 제목은 이미 문서 순서로 정렬돼 있으므로
+    // 기준선을 넘지 않은 첫 제목을 만나는 순간 멈춘다.
+    const THRESHOLD_PX = 120;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            visibleIds.add(entry.target.id);
-          } else {
-            visibleIds.delete(entry.target.id);
-          }
+    function updateActiveId() {
+      let current = headingElements[0].id;
+
+      for (const { id, el } of headingElements) {
+        if (el.getBoundingClientRect().top <= THRESHOLD_PX) {
+          current = id;
+        } else {
+          break;
         }
+      }
 
-        const stillVisible = items.filter((item) => visibleIds.has(item.id));
-        if (stillVisible.length > 0) {
-          setActiveId(stillVisible[0].id);
-        }
-      },
-      { rootMargin: "-80px 0px -60% 0px", threshold: 0 },
-    );
+      setActiveId(current);
+    }
 
-    headingElements.forEach((el) => observer.observe(el));
+    updateActiveId();
 
-    return () => observer.disconnect();
+    // requestAnimationFrame으로 스로틀하면 탭/패널이 백그라운드로 밀렸을 때 rAF 자체가
+    // 멈춰서 갱신이 안 될 수 있다. 제목 수가 많아야 수십 개라 매 스크롤마다 그대로
+    // 계산해도 부담이 없으므로, 스크롤 이벤트에서 바로 계산한다.
+    window.addEventListener("scroll", updateActiveId, { passive: true });
+    window.addEventListener("resize", updateActiveId);
+
+    return () => {
+      window.removeEventListener("scroll", updateActiveId);
+      window.removeEventListener("resize", updateActiveId);
+    };
   }, [items]);
 
   useEffect(() => {
@@ -89,6 +96,36 @@ export function TableOfContents({ items }: TableOfContentsProps) {
 
     return () => observer.disconnect();
   }, []);
+
+  // 데스크톱 사이드바(전체 표시)와 달리 모바일 목차는 3줄 높이로 잘려 자체 스크롤이 있다.
+  // 페이지를 스크롤해 activeId가 바뀌어도 그 항목이 목차의 스크롤 영역 밖에 있으면 안 보이므로,
+  // 매번 그 링크가 보이도록 (페이지 스크롤은 건드리지 않고) nav 내부 scrollTop만 옮겨준다.
+  useEffect(() => {
+    if (!activeId) {
+      return;
+    }
+
+    const links = document.querySelectorAll<HTMLAnchorElement>(
+      `nav[aria-label="목차"] a[href="#${CSS.escape(activeId)}"]`,
+    );
+
+    links.forEach((link) => {
+      const container = link.closest("nav");
+      if (!container) {
+        return;
+      }
+
+      const containerRect = container.getBoundingClientRect();
+      const linkRect = link.getBoundingClientRect();
+      const isAbove = linkRect.top < containerRect.top;
+      const isBelow = linkRect.bottom > containerRect.bottom;
+
+      if (isAbove || isBelow) {
+        container.scrollTop +=
+          linkRect.top - containerRect.top - container.clientHeight / 2 + linkRect.height / 2;
+      }
+    });
+  }, [activeId]);
 
   if (items.length === 0) {
     return null;
