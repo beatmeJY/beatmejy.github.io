@@ -8,8 +8,47 @@ import {
   findAvailablePort,
   nextPortAfter,
   preferredPort,
+  resolveDevAgent,
   resolveDevPort,
 } from "./dev-port.mjs";
+
+describe("resolveDevAgent", () => {
+  it("prefers git branch over directory name", () => {
+    assert.equal(
+      resolveDevAgent("/tmp/weird-name", { branch: "feature/cursor-work" }),
+      "cursor",
+    );
+    assert.equal(
+      resolveDevAgent("/tmp/weird-name", { branch: "feature/claude-work" }),
+      "claude",
+    );
+    assert.equal(resolveDevAgent("/tmp/weird-name", { branch: "main" }), "main");
+  });
+
+  it("maps known worktree directory names when branch unknown", () => {
+    assert.equal(
+      resolveDevAgent("/Users/youl/Projects/beatmejy.github.io", {
+        branch: null,
+      }),
+      "main",
+    );
+    assert.equal(
+      resolveDevAgent("/Users/youl/Projects/beatmejy-cursor", { branch: null }),
+      "cursor",
+    );
+    assert.equal(
+      resolveDevAgent("/Users/youl/Projects/beatmejy-claude", { branch: null }),
+      "claude",
+    );
+  });
+
+  it("returns unknown for unrecognized trees", () => {
+    assert.equal(
+      resolveDevAgent("/tmp/other-clone", { branch: null }),
+      "unknown",
+    );
+  });
+});
 
 describe("preferredPort", () => {
   it("prefers git branch over directory name", () => {

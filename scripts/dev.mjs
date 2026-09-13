@@ -9,7 +9,7 @@ import { spawn } from "node:child_process";
 import { existsSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { nextPortAfter, resolveDevPort } from "./dev-port.mjs";
+import { nextPortAfter, resolveDevAgent, resolveDevPort } from "./dev-port.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const nextBin = join(root, "node_modules", "next", "dist", "bin", "next");
@@ -26,9 +26,10 @@ function looksLikeAddrInUse(text) {
  * next를 띄우고, 정상 종료/시그널까지 기다린다.
  * 포트 충돌로 바로 죽으면 eaddrinuse: true.
  * @param {number} port
+ * @param {string} agent
  * @returns {Promise<{ eaddrinuse: boolean, code: number | null, signal: NodeJS.Signals | null }>}
  */
-function runNextDev(port) {
+function runNextDev(port, agent) {
   return new Promise((resolvePromise) => {
     let stderr = "";
     const child = spawn(
@@ -40,6 +41,8 @@ function runNextDev(port) {
         env: {
           ...process.env,
           PORT: String(port),
+          // layout이 탭 favicon·제목 접두사를 worktree별로 고를 때 사용
+          DEV_AGENT: agent,
         },
       },
     );
@@ -78,6 +81,7 @@ async function main() {
     process.exit(1);
   }
 
+  const agent = resolveDevAgent(root);
   let { preferred, port, redirected } = await resolveDevPort(root);
   if (redirected) {
     console.log(
@@ -85,11 +89,13 @@ async function main() {
     );
   }
 
+  console.log(`[dev] worktree agent: ${agent}`);
+
   for (let attempt = 1; attempt <= MAX_BIND_ATTEMPTS; attempt += 1) {
     console.log(`[dev] using port ${port} (attempt ${attempt}/${MAX_BIND_ATTEMPTS})`);
     console.log(`[dev] http://localhost:${port}`);
 
-    const result = await runNextDev(port);
+    const result = await runNextDev(port, agent);
     if (result.signal) {
       process.kill(process.pid, result.signal);
       return;

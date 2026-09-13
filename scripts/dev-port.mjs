@@ -24,6 +24,25 @@ export const WORKTREE_PORTS = Object.freeze({
 /** 알 수 없는 clone/worktree — main(3000)과 겹치지 않게 시작 */
 export const UNKNOWN_FALLBACK_PORT = 3100;
 
+/**
+ * 로컬 dev 탭 구분용 에이전트 식별자.
+ * @typedef {'main' | 'cursor' | 'claude' | 'unknown'} DevAgent
+ */
+
+/** @type {Readonly<Record<string, DevAgent>>} */
+export const BRANCH_AGENTS = Object.freeze({
+  main: "main",
+  "feature/cursor-work": "cursor",
+  "feature/claude-work": "claude",
+});
+
+/** @type {Readonly<Record<string, DevAgent>>} */
+export const WORKTREE_AGENTS = Object.freeze({
+  "beatmejy.github.io": "main",
+  "beatmejy-cursor": "cursor",
+  "beatmejy-claude": "claude",
+});
+
 const PORT_SCAN_LIMIT = 100;
 
 /**
@@ -40,6 +59,27 @@ export function readGitBranch(cwd) {
   const branch = (result.stdout || "").trim();
   if (!branch || branch === "HEAD") return null;
   return branch;
+}
+
+/**
+ * 브랜치(우선)·디렉터리명으로 로컬 worktree 에이전트를 고른다.
+ * @param {string} cwd
+ * @param {{ branch?: string | null }} [options]
+ * @returns {DevAgent}
+ */
+export function resolveDevAgent(cwd, options = {}) {
+  const branch =
+    options.branch !== undefined ? options.branch : readGitBranch(cwd);
+  if (branch && Object.hasOwn(BRANCH_AGENTS, branch)) {
+    return BRANCH_AGENTS[branch];
+  }
+
+  const name = basename(cwd);
+  if (Object.hasOwn(WORKTREE_AGENTS, name)) {
+    return WORKTREE_AGENTS[name];
+  }
+
+  return "unknown";
 }
 
 /**

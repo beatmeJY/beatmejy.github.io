@@ -21,12 +21,14 @@
 
 두 worktree에서 동시에 `npm run dev`하면 기본 3000이 충돌한다. `scripts/dev.mjs`가 **브랜치(우선)·디렉터리명**으로 기본 포트를 나누고, 점유/`EADDRINUSE`(선점 레이스 포함)면 다음 빈 포트로 재시도한다.
 
-| 브랜치 / worktree | 기본 포트 |
-| --- | --- |
-| `main` / `beatmejy.github.io` | 3000 |
-| `feature/cursor-work` / `beatmejy-cursor` | 3001 |
-| `feature/claude-work` / `beatmejy-claude` | 3002 |
-| 그 외 | 3100부터 |
+| 브랜치 / worktree | 기본 포트 | 로컬 탭 구분 |
+| --- | --- | --- |
+| `main` / `beatmejy.github.io` | 3000 | (기본) |
+| `feature/cursor-work` / `beatmejy-cursor` | 3001 | favicon `public/images/cursor.jpeg`, 제목 `[Cursor]` |
+| `feature/claude-work` / `beatmejy-claude` | 3002 | favicon `public/images/claude.png`, 제목 `[Claude]` |
+| 그 외 | 3100부터 | (기본) |
+
+`npm run dev`가 `DEV_AGENT`를 넘기고, `app/layout.tsx`가 개발 모드에서만 탭 아이콘·제목 접두사를 바꾼다. production 빌드/배포에는 적용되지 않는다.
 
 포트 선택 로직 검증: `npm run test:dev-port`
 
