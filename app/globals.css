@@ -14,6 +14,16 @@
   --code-inline-fg: #bc4c00;
   --quote-bg: #f6f8fa;
   --shadow: 0 1px 2px rgb(31 35 40 / 6%);
+
+  /* 데스크톱 목차를 본문 컬럼 오른쪽에 붙이는 offset: 본문 절반 + 간격 1.5rem.
+     본문 max-w가 넓어지는 2xl에서 같이 벌어져야 목차가 본문 위로 겹치지 않는다. */
+  --toc-offset: 25.5rem;
+}
+
+@media (min-width: 1536px) {
+  :root {
+    --toc-offset: 27.5rem;
+  }
 }
 
 @theme inline {
