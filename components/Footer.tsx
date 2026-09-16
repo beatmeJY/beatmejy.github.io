@@ -3,7 +3,7 @@ import { siteConfig } from "@/lib/site";
 export function Footer() {
   return (
     <footer className="mt-auto border-t border-border">
-      <div className="mx-auto flex w-full max-w-3xl flex-col gap-2 px-4 py-8 text-sm text-muted sm:flex-row sm:items-center sm:justify-between sm:px-6">
+      <div className="mx-auto flex w-full max-w-3xl flex-col gap-2 px-4 py-8 text-sm text-muted sm:flex-row sm:items-center sm:justify-between sm:px-6 2xl:max-w-[52rem]">
         <p>
           © {new Date().getFullYear()} {siteConfig.author}
         </p>

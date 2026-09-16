@@ -64,7 +64,10 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           본문으로 건너뛰기
         </a>
         <Header />
-        <main id="main" className="mx-auto w-full max-w-3xl flex-1 px-4 py-10 sm:px-6">
+        <main
+          id="main"
+          className="mx-auto w-full max-w-3xl flex-1 px-4 py-10 sm:px-6 2xl:max-w-[52rem]"
+        >
           {children}
         </main>
         <Footer />

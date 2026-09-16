@@ -14,6 +14,10 @@ type TableOfContentsProps = {
  *   1280px에서 여백이 정확히 얼마나 남는지 계산해 폭·간격을 잡았다:
  *     본문 절반 24rem + 간격 1.5rem + 목차 폭 12rem = 37.5rem(600px) 지점에서 끝남
  *     1280px 뷰포트의 절반(640px) + 600px = 1240px < 1280px → 40px 여유
+ *   2xl(1536px) 이상은 본문이 52rem로 넓어지므로 같은 방식으로 다시 계산한다:
+ *     본문 절반 26rem + 간격 1.5rem + 목차 폭 16rem = 43.5rem(696px)
+ *     768px + 696px = 1464px < 1536px → 72px 여유
+ *   offset(본문 절반 + 간격)은 globals.css의 `--toc-offset`이 브레이크포인트별로 들고 있다.
  *   목차가 길어 스크롤이 생기면 `position: fixed`라 글 길이와 무관하게 화면에 계속 떠
  *   있는데, 글이 짧으면 그 사이 푸터가 뷰포트로 올라와 겹칠 수 있다. footer의 실제 위치를
  *   계속 측정해서 max-height를 동적으로 좁혀 푸터 앞에서 멈추게 한다. 스크롤바가 생겼다
@@ -259,9 +263,9 @@ export function TableOfContents({ items }: TableOfContentsProps) {
       {/* xl 이상: 오른쪽 여백 사이드바 */}
       <nav
         aria-label="목차"
-        className="toc-scroll hidden [scrollbar-gutter:stable] xl:fixed xl:top-24 xl:block xl:w-48 xl:overflow-y-auto"
+        className="toc-scroll hidden [scrollbar-gutter:stable] xl:fixed xl:top-24 xl:block xl:w-48 xl:overflow-y-auto 2xl:w-64"
         style={{
-          left: "calc(50% + 25.5rem)",
+          left: "calc(50% + var(--toc-offset))",
           maxHeight: desktopMaxHeightPx !== null ? `${desktopMaxHeightPx}px` : "calc(100vh - 8rem)",
         }}
       >
