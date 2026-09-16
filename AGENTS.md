@@ -241,7 +241,33 @@ BLOCKER처럼 "왜 문제인지"와 "발생 조건"이 리뷰받는 사람에게
 
 `REVIEW RESULT`는 `APPROVE` / `CHANGES REQUIRED` / `NEEDS HUMAN DECISION` 중 하나다.
 
-## 10. Design Comparison
+## 10. Review Identity
+
+리뷰 코멘트는 **반드시 에이전트 전용 GitHub 계정으로 남긴다.**
+`gh pr comment` / `gh pr review`를 직접 쓰지 않는다. 개인 계정(`@beatmeJY`)으로 나가서
+누가 남긴 리뷰인지 구분되지 않는다.
+
+```bash
+# 1. 신원 확인 (login이 beatmejy-claude / beatmejy-cursor 여야 한다)
+node scripts/agent-pr-comment.mjs --agent claude --whoami
+
+# 2. 코멘트
+node scripts/agent-pr-comment.mjs --agent claude --pr <N> --body-file <file>
+```
+
+| 행위 | 계정 |
+| --- | --- |
+| Agent A (Claude) 리뷰 | `@beatmejy-claude` |
+| Agent B (Cursor) 리뷰 | `@beatmejy-cursor` |
+| 사람 의견 코멘트 / PR 머지 / push | `@beatmeJY` |
+
+활성 `gh` 계정은 `@beatmeJY`로 둔다. 스크립트가 봇 토큰을 따로 읽으므로
+`gh auth switch`를 할 필요가 없다.
+
+실수로 개인 계정으로 남겼다면 그 코멘트를 삭제하고 다시 올린다.
+자세한 내용은 `docs/AGENT-GITHUB-IDENTITIES.md`를 본다.
+
+## 11. Design Comparison
 
 두 Agent의 구현이 모두 존재하는 경우
 단순히 각각의 문제만 찾지 않는다.
@@ -263,7 +289,7 @@ BLOCKER처럼 "왜 문제인지"와 "발생 조건"이 리뷰받는 사람에게
 억지로 하나를 선택하지 않고
 Trade-off를 HUMAN DECISION으로 보고한다.
 
-## 11. Human Decision
+## 12. Human Decision
 
 다음과 같은 사항은 Agent가 임의로 결정하지 않는다.
 
@@ -288,7 +314,7 @@ Recommendation:
 Recommendation의 근거:
 ```
 
-## 12. Git
+## 13. Git
 
 각 Agent는 자신의 작업 브랜치에서만 작업한다.
 다른 Agent의 작업 브랜치를 직접 수정하지 않는다.
@@ -303,13 +329,13 @@ PR에는 다음 내용을 포함한다.
 - 고려한 장애 상황
 - 알려진 제한사항
 
-## 13. No Fake Verification
+## 14. No Fake Verification
 
 실행하지 않은 테스트를 실행했다고 보고하지 않는다.
 확인하지 않은 동작을 정상이라고 단정하지 않는다.
 추측과 실제 검증 결과를 구분해서 작성한다.
 
-## 14. Final Report
+## 15. Final Report
 
 모든 작업이 끝나면 다음 정보를 간결하게 보고한다.
 
@@ -330,7 +356,7 @@ PR에는 다음 내용을 포함한다.
 사용자가 직접 결정해야 하는 것은 무엇인가?
 없다면 `NONE`.
 
-## 15. Core Principle
+## 16. Core Principle
 
 두 Agent의 목적은
 서로의 코드를 무조건 수정하는 것이 아니다.
