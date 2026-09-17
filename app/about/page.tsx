@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Image from "next/image";
 import Link from "next/link";
 import { siteConfig } from "@/lib/site";
 
@@ -289,18 +290,30 @@ export default function AboutPage() {
     <div className="flex flex-col gap-16">
       {/* Hero */}
       <header>
-        <p className="text-sm font-medium tracking-wide text-accent">
-          최지율 · Backend Engineer
-        </p>
-        <h1 className="mt-3 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
-          멈추는 지점과 어긋나는 지점을
-          <br className="hidden sm:block" /> 구조로 고칩니다
-        </h1>
-        <p className="mt-5 max-w-2xl text-muted">
-          물류·풀필먼트 도메인에서 일해 온 4년 차 백엔드 개발자입니다. 하루 만 건이
-          넘는 주문과 현장 작업이 걸린 시스템을 다루며, 성능·정합성·장애 문제를
-          분석하고 구조로 해결해 왔습니다.
-        </p>
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-start sm:gap-8">
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-medium tracking-wide text-accent">
+              최지율 · Backend Engineer
+            </p>
+            <h1 className="mt-3 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
+              멈추는 지점과 어긋나는 지점을
+              <br className="hidden sm:block" /> 구조로 고칩니다
+            </h1>
+            <p className="mt-5 text-muted">
+              물류·풀필먼트 도메인에서 일해 온 4년 차 백엔드 개발자입니다. 하루 만
+              건이 넘는 주문과 현장 작업이 걸린 시스템을 다루며, 성능·정합성·장애
+              문제를 분석하고 구조로 해결해 왔습니다.
+            </p>
+          </div>
+          <Image
+            src="/images/profile.jpg"
+            alt="화이트보드에 설계를 그리며 설명하는 최지율"
+            width={900}
+            height={900}
+            priority
+            className="size-28 shrink-0 rounded-xl border border-border object-cover sm:size-36"
+          />
+        </div>
 
         <dl className="mt-8 grid gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">
           {stats.map((stat) => (
