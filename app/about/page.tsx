@@ -645,8 +645,9 @@ export default function AboutPage() {
       {/* 링크 */}
       <section
         aria-labelledby="links"
-        className="rounded-xl border border-border bg-surface px-5 py-5 sm:px-6"
+        className="flex flex-col gap-6 rounded-xl border border-border bg-surface px-5 py-5 sm:flex-row sm:items-center sm:gap-8 sm:px-6"
       >
+        <div className="min-w-0 flex-1">
         <h2 id="links" className="text-xl font-semibold tracking-tight">
           링크
         </h2>
@@ -673,6 +674,14 @@ export default function AboutPage() {
             이기자&rdquo;는 뜻으로 지었습니다.
           </li>
         </ul>
+        </div>
+        <Image
+          src="/images/profile-2.jpg"
+          alt="밤 강변에서 찍은 최지율"
+          width={600}
+          height={800}
+          className="h-40 w-full shrink-0 rounded-lg border border-border object-cover sm:h-44 sm:w-36"
+        />
       </section>
     </div>
   );
