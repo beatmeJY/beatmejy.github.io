@@ -9,7 +9,7 @@ tags:
   - JPA
   - Bit Flag
 draft: false
-popularRank: 4
+popularRank: 1
 ---
 
 ## 들어가며
