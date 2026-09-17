@@ -5,127 +5,9 @@ import { siteConfig } from "@/lib/site";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "물류·WMS 도메인에서 일하는 4년 차 백엔드 개발자 beatmeJY입니다. 장애 격리, 분산 환경 동시성, 이벤트 기반 책임 분리 경험을 문제해결 사례로 정리했습니다.",
-  alternates: {
-    canonical: "/about/",
-  },
+    "물류·풀필먼트 도메인 4년 차 백엔드 개발자 beatmeJY의 포트폴리오입니다. 장애 격리, 분산 환경 동시성, 이벤트 기반 책임 분리, 대용량 처리 최적화 경험을 사례로 정리했습니다.",
+  alternates: { canonical: "/about/" },
 };
-
-const strengths = [
-  "장애나 동시성처럼 재현이 어려운 문제를 스레드 덤프와 라이브러리 소스까지 내려가 원인을 특정합니다.",
-  "도메인 규칙을 데이터 모델로 옮겨, 요구사항이 바뀌어도 분기가 늘지 않는 구조를 만듭니다.",
-  "선택할 때 트레이드오프를 수치로 확인하고, 해결하지 못하고 남은 위험은 숨기지 않고 기록합니다.",
-];
-
-type Project = {
-  domain: string;
-  title: string;
-  problem: string;
-  decisions: string[];
-  result: string;
-  stack: string[];
-  slug?: string;
-};
-
-const projects: Project[] = [
-  {
-    domain: "주문 연동 · 장애 대응",
-    title: "하위 서버 한 곳이 죽자 우리 서버 스레드 풀이 40분간 고갈됐다",
-    problem:
-      "주문 전달 배치를 비동기로 전환한 지 한 달쯤 됐을 때, 협력 중이던 하위 서버가 다운되면서 200개짜리 스레드 풀이 약 40분 동안 고갈됐다. 하위 서버가 죽었는데 왜 우리 서버 기능까지 멈추는지가 먼저 풀어야 할 문제였다.",
-    decisions: [
-      "스레드 덤프에서 워커 대부분이 `TIMED_WAITING`으로 소켓 응답을 기다리고 있고, 대기 시간이 60초 근처에서 끊기는 패턴을 확인했다.",
-      "`feign.Request.Options` 소스를 열어 설정하지 않은 기본 readTimeout이 60초라는 걸 특정했다. 요청 하나가 스레드를 최대 60초까지 붙잡고 있었다.",
-      "하위 서버마다 평소 응답 속도가 달라 일괄 적용 대신 서버별로 타임아웃을 잡았다(3~15초). 느린 서버 하나가 전체 대기 시간을 결정하지 못하게 했다.",
-      "Resilience4j 서킷 브레이커를 붙였다. 값은 피크 트래픽(초당 약 1,000건)에서 역산했다. 슬라이딩 윈도 100건이 쌓이는 데 약 0.1초, 실패율 50%면 초당 500건이 스레드를 점유해 풀 200개가 약 0.4초 만에 소진되는 구조였다.",
-      "차단이 곧 유실이 되지 않도록, 끊긴 주문은 복구 후 재전송 배치로 되돌리고 Slack으로 알렸다.",
-    ],
-    result:
-      "남의 장애를 내 장애로 받지 않는 경계가 생겼다. 설정값을 감이 아니라 트래픽에서 역산해 정했다는 게 이 작업에서 가장 크게 남았다.",
-    stack: ["Java", "Spring Async", "OpenFeign", "Resilience4j"],
-    slug: "preventing-thread-blocking-with-circuitBreaker",
-  },
-  {
-    domain: "WMS · 물류센터",
-    title: "작업 이력과 통계를 업무 API에서 떼어냈다",
-    problem:
-      "메인 서버가 입고·피킹 같은 핵심 업무 API를 처리하면서, 공정이 끝날 때마다 쌓이는 작업 이력과 통계까지 같은 요청 흐름에서 맡고 있었다. 이력 로직이 무거워질수록 그 부담이 작업자의 응답 시간에 그대로 얹혔다.",
-    decisions: [
-      "Controller에 `@WorkCount`만 선언하면 AOP가 이력을 수집하도록 만들고, 정상 응답인 요청만 이력으로 남겼다.",
-      "수집과 전송을 끊어, 이벤트를 Redis Streams로 넘기고 그 뒤 처리는 전부 별도 Worker가 맡게 했다.",
-      "저장소를 데이터 성격으로 갈랐다. 시간대로 뭉쳐도 되는 집계는 MongoDB, 초 단위 구간 추적은 MySQL.",
-      "Streams 레코드 ID를 로그 문서 키로 써서, 재처리로 같은 이벤트가 다시 들어와도 집계가 두 번 올라가지 않게 했다.",
-    ],
-    result:
-      "업무 API 코드에서 이력 로직이 사라졌고, 결과적으로 특정 Controller에 종속되지 않는 공용 이력 처리 경로가 됐다. 지금은 WMS 바깥의 공정 시스템도 같은 경로를 쓴다. 전달 실패분은 RDB에 적재해 나중에 벌크로 메우고 있고, 완전한 전달 보장은 남은 과제로 기록해뒀다.",
-    stack: ["Spring AOP", "이벤트 기반", "Redis Streams", "MongoDB", "MySQL"],
-    slug: "wms-worker-server-history-separation",
-  },
-  {
-    domain: "WMS · 물류센터",
-    title: "문자열 ID뿐이던 창고를 격자 그래프로 다시 그렸다",
-    problem:
-      "로케이션이 `3-12-2` 같은 문자열 ID로만 존재해, 작업자가 어디로 어떻게 가야 하는지 알 수 없었다. 설비마다 ID 자릿수의 의미가 달랐고 창고 레이아웃 자체도 자주 바뀌었다.",
-    decisions: [
-      "창고를 격자 그래프로 모델링하고, 공간과 설비를 1:N으로 분리해 레이아웃 변경이 재고 데이터를 건드리지 않게 했다.",
-      "셀마다 접근 가능한 방향을 Bit Flag 한 컬럼(0~15)으로 두어, 층당 약 8,000행이 필요한 엣지 테이블 없이 4방향 접근을 제어했다.",
-      "행·열 삽입 같은 레이아웃 변경은 JPQL 벌크 연산으로 처리해, 셀을 하나씩 옮기지 않고 한 번에 밀어냈다.",
-    ],
-    result:
-      "3,800개가 넘는 격자 셀 위에 행거 2,746개와 경량 렉 528개를 매핑했다. 셀을 하나씩 클릭해야 하면 쓰이지 않을 기능이라, 관리자가 화면에서 창고를 직접 편집할 수 있는 데까지 만들었다.",
-    stack: ["Java", "JPA / JPQL", "MySQL", "그래프 모델링", "Bit Flag"],
-    slug: "warehouse-map",
-  },
-];
-
-type Decision = {
-  title: string;
-  body: string;
-  slug: string;
-};
-
-const decisions: Decision[] = [
-  {
-    title: "분산 환경의 lost update",
-    body: "1시간 단위 슬롯 예약에서 조회와 차감 사이에 수량이 어긋나던 문제를 Redisson 락으로 막았습니다. 락을 트랜잭션 바깥에 두도록 AOP 경계를 잡았고, 워치독의 30초가 스레드가 죽었을 때만 적용되는 값이라는 걸 확인한 뒤 배제했던 선택을 뒤집었습니다. 두 슬롯을 함께 잠글 때는 키를 오름차순으로 정렬해 데드락을 막았습니다.",
-    slug: "redisson-distributed-lock-multilock",
-  },
-  {
-    title: "AES-CBC에서 GCM으로",
-    body: "토큰의 민감 필드 암호화를 100만 회 반복 측정해 GCM이 오히려 15~20% 빠르다는 걸 확인한 뒤, 무결성까지 함께 얻는 방식으로 옮겼습니다. 운영 중인 암호 모드를 인상으로 바꿀 수는 없다고 봤고, 측정 방법이 JMH 대비 가진 한계도 같이 남겼습니다.",
-    slug: "cbc-vs-gcm-performance-comparison",
-  },
-  {
-    title: "세션 키, 충돌 확률보다 예측 불가능성",
-    body: "과거에 충돌 확률을 200만 배 낮추겠다고 밀리세컨드를 섞었던 세션 키 설계를 4년 차에 다시 봤습니다. 보안 식별자에서 중요한 건 충돌이 아니라 예측 불가능성이고, 시간을 섞는 순간 키에 생성 시각을 새겨 넣은 셈이라는 결론으로 뒤집었습니다.",
-    slug: "session-id-lesson-predictability-over-collision",
-  },
-];
-
-const careers = [
-  {
-    period: "2023.11 ~ 2026.08",
-    domain: "물류 플랫폼 (WMS · 주문 연동)",
-    summary:
-      "입고부터 출고까지 이어지는 창고 운영 시스템과 주문 연동을 맡았습니다. 실제 작업자가 쓰는 시스템이라, 장애와 데이터 정합성이 곧 현장 업무 중단으로 이어지는 환경이었습니다.",
-  },
-  {
-    period: "2021.04 ~ 2023.10",
-    domain: "SI (2년 6개월)",
-    summary:
-      "고객사별 시스템을 구축하며 Java·Spring 기반 업무 개발의 기본기를 쌓았습니다. 2년 만에 인턴에서 매니저까지 진급했고, 공통 라이브러리 개선과 코드리뷰·정적 분석 도입을 시도하며 개발 문화가 도구만으로 만들어지지 않는다는 걸 배웠습니다.",
-  },
-];
-
-const stackGroups = [
-  { name: "언어", items: ["Java", "Kotlin"] },
-  {
-    name: "프레임워크",
-    items: ["Spring Boot", "Spring AOP", "Spring Data JPA", "OpenFeign", "Resilience4j"],
-  },
-  { name: "데이터", items: ["MySQL", "MongoDB", "Redis", "Redisson", "Redis Streams"] },
-  { name: "인프라", items: ["AWS EC2", "GitHub Actions"] },
-];
 
 /** 문자열 안의 `코드` 표기를 <code>로 렌더링한다. */
 function RichText({ text }: { text: string }) {
@@ -135,7 +17,7 @@ function RichText({ text }: { text: string }) {
         part.startsWith("`") && part.endsWith("`") ? (
           <code
             key={index}
-            className="rounded bg-code-bg px-1 py-0.5 text-[0.9em] text-code-inline-fg"
+            className="rounded bg-code-bg px-1 py-0.5 text-[0.9em] text-[color:var(--code-inline-fg)]"
           >
             {part.slice(1, -1)}
           </code>
@@ -147,144 +29,583 @@ function RichText({ text }: { text: string }) {
   );
 }
 
+function SectionHeading({
+  id,
+  title,
+  description,
+}: {
+  id: string;
+  title: string;
+  description?: string;
+}) {
+  return (
+    <div>
+      <h2 id={id} className="text-xl font-semibold tracking-tight">
+        {title}
+      </h2>
+      {description ? (
+        <p className="mt-1.5 text-sm text-muted">{description}</p>
+      ) : null}
+    </div>
+  );
+}
+
+const stats = [
+  { value: "4년", label: "백엔드 경력" },
+  { value: "10,000건+", label: "일 평균 처리 주문" },
+  { value: "60s → 3~15s", label: "장애 시 요청당 점유 시간" },
+  { value: "300 → 1,800", label: "부하 테스트 TPS 개선" },
+];
+
+const principles = [
+  {
+    title: "원인에서 멈춘다",
+    body: "증상이 사라지는 방향으로 고치기 전에 왜 그런지부터 봅니다. 스레드 덤프, 힙 덤프, 실행계획, 라이브러리 소스까지 내려가 병목을 특정합니다.",
+  },
+  {
+    title: "숫자로 정한다",
+    body: "설정값과 기술 선택을 인상으로 정하지 않습니다. 트래픽에서 역산하거나 직접 측정해 근거를 만들고, 측정 방법의 한계도 같이 적습니다.",
+  },
+  {
+    title: "남은 위험을 적는다",
+    body: "구조를 바꾸면 그 자리에 새 문제가 생깁니다. 해결하지 못한 것을 결과와 같은 비중으로 기록해, 다음 사람이 판단할 수 있게 합니다.",
+  },
+];
+
+type Project = {
+  no: string;
+  domain: string;
+  title: string;
+  problem: string;
+  actions: string[];
+  result: string;
+  metrics: { value: string; label: string }[];
+  stack: string[];
+  slug: string;
+};
+
+const projects: Project[] = [
+  {
+    no: "01",
+    domain: "Studio 3S Korea · 주문 연동",
+    title: "하위 서버 한 곳이 죽자 우리 서버가 40분간 멈췄다",
+    problem:
+      "일 평균 10,000건이 넘는 주문을 여러 하위 서버로 전달하는 구조였습니다. 전달을 비동기로 바꾼 지 한 달쯤 됐을 때 협력 서버 한 곳이 다운되면서, 200개짜리 스레드 풀이 약 40분 동안 고갈됐습니다. 남의 장애가 왜 우리 장애가 되는지부터 풀어야 했습니다.",
+    actions: [
+      "스레드 덤프에서 워커 대부분이 `TIMED_WAITING`으로 소켓 응답을 기다리고, 대기 시간이 60초 근처에서 끊기는 패턴을 확인했습니다.",
+      "`feign.Request.Options` 소스를 열어 설정하지 않은 기본 readTimeout이 60초라는 것을 특정했습니다. 요청 하나가 스레드를 60초까지 붙잡고 있었습니다.",
+      "하위 서버마다 평소 응답 속도가 달라 일괄 적용 대신 서버별로 타임아웃을 잡았습니다(60초 → 3~15초).",
+      "서킷 브레이커 설정값은 피크 트래픽에서 역산했습니다. 초당 1,000건이면 슬라이딩 윈도 100건이 쌓이는 데 약 0.1초, 실패율 50%면 스레드 풀 200개가 약 0.4초 만에 소진되는 구조였습니다.",
+      "차단이 곧 유실이 되지 않도록 실패 건을 모아 복구 후 재전송하는 배치를 두고, Circuit Open 시 Slack으로 알렸습니다.",
+    ],
+    result:
+      "타임아웃만 줄이거나 Retry를 붙이는 대안도 검토했지만, 실패가 계속되는 동안 호출 자체를 끊어주지 않으면 같은 일이 반복된다고 봤습니다. Timeout과 Circuit Breaker를 함께 두어 장애 전파 경로를 끊었고, 대기 비용을 약 80% 줄였습니다.",
+    metrics: [
+      { value: "약 80% 감소", label: "장애 시 대기 비용" },
+      { value: "60s → 3~15s", label: "요청당 최대 점유" },
+      { value: "1,000 TPS", label: "설정 역산 기준" },
+    ],
+    stack: ["Java", "Spring Async", "OpenFeign", "Resilience4j"],
+    slug: "preventing-thread-blocking-with-circuitBreaker",
+  },
+  {
+    no: "02",
+    domain: "코너로지스 · WMS",
+    title: "작업 이력과 통계를 업무 API에서 떼어냈다",
+    problem:
+      "메인 서버가 입고·피킹 같은 핵심 업무를 처리하면서, 공정이 끝날 때마다 쌓이는 이력과 통계까지 같은 요청 흐름에서 맡고 있었습니다. 이력 로직이 무거워질수록 그 부담이 작업자의 응답 시간에 그대로 얹혔습니다.",
+    actions: [
+      "Controller에 `@WorkCount`만 선언하면 AOP가 이력을 수집하게 만들고, 정상 응답인 요청만 이력으로 남겼습니다.",
+      "수집과 전송을 끊어, 이벤트를 Redis Streams로 넘긴 뒤 저장과 집계는 전부 별도 Worker가 맡게 했습니다.",
+      "저장소를 데이터 성격으로 갈랐습니다. 시간대로 뭉쳐도 되는 집계는 MongoDB(AWS DocumentDB), 초 단위 작업 구간 추적은 MySQL.",
+      "Streams 레코드 ID를 로그 문서 키로 쓰고 `insert`로 저장해, 재처리로 같은 이벤트가 다시 들어와도 집계가 두 번 올라가지 않게 했습니다.",
+      "발행 실패분은 RDB에 실패 이력으로 적재하고, 벌크 반영 기능으로 나중에 되메울 수 있게 했습니다.",
+    ],
+    result:
+      "업무 API에서 이력 코드가 사라졌고, 결과적으로 특정 Controller에 종속되지 않는 공용 이력 처리 경로가 됐습니다. 지금은 WMS 바깥의 공정 시스템도 같은 경로를 씁니다. 완전한 전달 보장은 남은 과제로 기록해뒀습니다.",
+    metrics: [
+      { value: "서버 분리", label: "업무와 이력 처리" },
+      { value: "DocumentDB + MySQL", label: "성격별 저장소" },
+      { value: "멱등 처리", label: "재처리 중복 차단" },
+    ],
+    stack: ["Spring AOP", "이벤트 기반", "Redis Streams", "AWS DocumentDB", "MySQL"],
+    slug: "wms-worker-server-history-separation",
+  },
+  {
+    no: "03",
+    domain: "코너로지스 · WMS",
+    title: "문자열 ID뿐이던 창고를 격자 그래프로 다시 그렸다",
+    problem:
+      "상품을 검색하면 `행거 3-12-2` 같은 값만 나왔습니다. 그 규칙을 아는 사람만 읽을 수 있어서, 신입 작업자는 숙련자의 통역을 기다리거나 직접 돌아다녀야 했습니다. 그 시간이 그대로 피킹 리드타임이 됐습니다.",
+    actions: [
+      "창고를 격자 그래프로 모델링하고, 공간과 설비를 1:N으로 분리해 레이아웃 변경이 재고 데이터를 건드리지 않게 했습니다.",
+      "셀마다 접근 가능한 방향을 Bit Flag 한 컬럼(0~15)에 담아, 층당 약 8,000행이 필요한 엣지 테이블 없이 4방향 접근을 제어했습니다.",
+      "행·열 삽입 같은 레이아웃 변경은 JPQL 벌크 연산으로 처리해, 셀을 하나씩 옮기지 않고 한 번에 밀어냈습니다.",
+      "설비마다 다른 로케이션 ID 체계는 enum이 흡수하게 해서, 호출하는 쪽이 설비별 분기를 몰라도 되게 했습니다.",
+      "셀 3,800개를 손으로 찍는 건 불가능하므로, 관리자가 화면에서 창고를 직접 편집하는 데까지 만들었습니다.",
+    ],
+    result:
+      "시스템은 답을 알고 있는데 사람에게 전달되지 않던 문제를 데이터 모델을 바꿔 풀었습니다. 지금 구조는 경로 탐색 그래프의 입력 데이터까지 갖춰져 있어, BFS를 얹는 것이 다음 단계입니다.",
+    metrics: [
+      { value: "3,800+", label: "격자 셀" },
+      { value: "2,746 / 528", label: "매핑한 행거 / 경량 렉" },
+      { value: "1 컬럼", label: "엣지 테이블 대체" },
+    ],
+    stack: ["Java", "JPA / JPQL", "MySQL", "그래프 모델링", "Bit Flag"],
+    slug: "warehouse-map",
+  },
+];
+
+const achievements = [
+  {
+    title: "대량 삭제 10초 → 2초",
+    body: "주문 API가 매 요청마다 1,000건 이상을 보내왔고, 같은 주문 번호가 갱신되면 기존 데이터를 지우고 다시 넣어야 했습니다. `deleteAll`은 연관 테이블이 많아 10초 넘게 걸렸습니다. EXPLAIN으로 병목을 확인하고, 연관 테이블을 주문 ID로 인덱싱해 PK를 먼저 조회한 뒤 MyBatis `IN` 쿼리로 일괄 삭제하도록 바꿨습니다.",
+  },
+  {
+    title: "동기 스케줄러를 트랜잭션 이벤트 + 비동기로",
+    body: "5초 주기로 반복 전송하던 구조가 작업량이 늘면 병목이 될 거라고 봤습니다. 트랜잭션 이벤트와 Async 기반 실시간 전송으로 바꿔, 요청 증가에 대응할 수 있는 구조를 만들었습니다.",
+  },
+  {
+    title: "로봇 128대 위치 전송을 RabbitMQ로",
+    body: "실시간성이 덜 중요한 통계 데이터는 30초·5분 주기 배치로 모아 보내고, 즉시성이 필요한 로봇 위치는 HTTP 대신 메시지 큐로 넘겼습니다. 연결 비용과 응답 지연을 줄여 전송 성능을 20~50% 개선했습니다.",
+  },
+  {
+    title: "AOP 기반 외부 API 이력 전수 수집",
+    body: "주문 하나당 20개가 넘는 API를 주고받아 정합성이 중요했습니다. 외부 인터페이스 컨트롤러에 AOP를 걸어 성공·실패를 가리지 않고 모든 이력을 남기고, 실패 건을 관리자가 바로 재전송할 수 있는 UI까지 제공했습니다.",
+  },
+  {
+    title: "온보딩 문서화와 코드 품질 개선",
+    body: "복잡한 물류 도메인 탓에 신규 입사자가 헤매는 걸 보고, 입사 초기 정리해둔 내용을 문서화해 공유했습니다. 오프라인 코드리뷰와 SonarQube를 함께 도입해, 인턴이 3개월 만에 실무 프로젝트에 투입될 수 있었습니다.",
+  },
+];
+
+type Decision = {
+  tag: string;
+  title: string;
+  body: string;
+  slug: string;
+};
+
+const decisions: Decision[] = [
+  {
+    tag: "동시성",
+    title: "분산 환경의 lost update를 막다",
+    body: "1시간 단위 슬롯 예약에서 조회와 차감 사이에 수량이 어긋났습니다. 에러 없이 두 요청 다 성공하는 문제라 더 위험했습니다. `synchronized`는 다중 서버에서 무의미하고 DB Lock은 레거시 DB에 부하를 더하며 Kafka는 지금 규모에 과하다고 보고 Redisson을 골랐습니다. 락은 트랜잭션 바깥에 두고, leaseTime 고정값이 처리 중 풀릴 수 있다는 걸 로컬 테스트로 확인한 뒤 워치독에 위임했습니다.",
+    slug: "redisson-distributed-lock-multilock",
+  },
+  {
+    tag: "보안",
+    title: "AES-CBC에서 GCM으로",
+    body: '운영 중인 암호 모드를 "좋다더라"로 바꿀 수는 없었습니다. 100만 회 반복 측정해 GCM이 오히려 15~20% 빠르다는 걸 확인하고 전환했습니다. 다만 `System.nanoTime()` 루프가 JMH 대비 갖는 오차 한계도 같이 적어, 정확한 수치를 주장하지는 않았습니다.',
+    slug: "cbc-vs-gcm-performance-comparison",
+  },
+  {
+    tag: "회고",
+    title: "세션 키, 충돌 확률보다 예측 불가능성",
+    body: "충돌 확률을 200만 배 낮추겠다고 밀리세컨드를 섞었던 과거 설계를 4년 차에 다시 봤습니다. UUID v1이 v4에 밀린 이유가 충돌이 아니라 유추 가능한 정보 노출이었다는 걸 떠올리고, 제가 같은 실수를 반대로 저질렀다는 결론에 닿았습니다.",
+    slug: "session-id-lesson-predictability-over-collision",
+  },
+  {
+    tag: "기초",
+    title: "`ready()`는 데이터 존재 여부가 아니다",
+    body: '소켓 스트림에서 `ready()`를 "읽을 게 있는지" 확인용으로 쓰다, 두 번째 요청부터 읽기 로직에 진입조차 못 하는 버그를 만들었습니다. 문서 문구만 보면 충분히 착각할 수 있는 메서드라, 구현까지 확인하고서야 non-blocking 판정이라는 걸 알았습니다.',
+    slug: "bufferedReader-ready",
+  },
+];
+
+const sideProject = {
+  name: "Dailyge",
+  period: "2024.06 ~ 2024.11",
+  summary:
+    "일정과 목표 달성률을 관리하는 웹 서비스입니다. 사용자 도메인을 맡아 인증·성능·품질 영역을 담당했고, 실제로 배포해 운영했습니다.",
+  href: "https://www.dailyge.com/",
+  repo: "https://github.com/dailyge/dailyge-server",
+  points: [
+    "회원가입 부하 테스트에서 TPS가 300에 머물러, 채번 테이블로 PK 생성과 저장을 분리했습니다.",
+    "CPU가 100%에서 내려오지 않아 힙 덤프를 떴더니 커넥션 핸들러에서 누수가 있었습니다. 초당 약 1,000개 커넥션을 감당하지 못해 GC가 계속 돌던 것이라, 부하 테스트로 적정 스레드 수 300을 찾아 TPS 1,100까지 올렸습니다.",
+    "자주 조회되는 사용자 정보에 Look-Aside 캐시와 TTL 30일을 두고 로그인 시 이벤트로 갱신되게 해 TPS 1,800을 달성했습니다.",
+    "JWT는 전체가 아니라 Payload만 암호화했습니다. 전체를 암호화하면 잘못된 토큰도 복호화해야 알 수 있어서, 구조와 만료를 먼저 검증할 수 있게 했습니다.",
+    "테스트 300여 개로 커버리지 80% 이상을 유지하고, RestDocs와 Swagger로 테스트가 통과할 때만 문서가 생성되게 했습니다.",
+    "팀에 프론트엔드 개발자가 없어 React와 TypeScript를 두 달 만에 익혀 UI를 만들고 팀에 공유했습니다.",
+  ],
+  stack: ["Java 17", "Spring Boot 3", "Redis", "MySQL", "JUnit 5", "RestDocs", "React"],
+};
+
+const careers = [
+  {
+    period: "2024.12 ~ 2026.02",
+    org: "코너로지스",
+    role: "Backend Engineer · Software Team",
+    headline: "입고·적재·상품화·피킹·출고·반품을 통합 관리하는 WMS 자체 시스템 구축",
+    points: [
+      "바코드·RFID 기반 실시간 상품 추적과 로케이션·재고 관리 개발",
+      "물류센터 전체 맵을 그래프로 모델링하고 이동 가능 방향을 Bit Flag로 표현",
+      "Lock·이벤트 기반 처리로 작업 동시성과 중복 처리 문제 해결",
+      "작업 공정·생산량 통계 시스템 구축, 서버 분리 및 DocumentDB 기반 이력 저장 구조 설계",
+      "네트워크 지연·중복 스캔 이슈 분석 및 개선, RDS 전환과 EC2 운영 안정화",
+    ],
+    tags: ["WMS", "도메인 모델링", "이벤트 기반 분리", "분산 락"],
+  },
+  {
+    period: "2020.10 ~ 2023.04",
+    org: "Studio 3S Korea",
+    role: "Backend Engineer · S/W팀",
+    headline: "CJ대한통운 군포 스마트 풀필먼트 자동화 · LGL 마이크로 풀필먼트 구축",
+    points: [
+      "일 평균 10,000건+ 주문과 주문당 20개 이상의 물류 API를 처리하는 서버 간 통합 시스템 개발",
+      "동기 스케줄러 전송을 트랜잭션 이벤트 + 비동기로 전환해 확장 가능한 구조로 개선",
+      "외부 API 장애로 인한 Thread Pool 고갈을 분석하고 Circuit Breaker로 대기 비용 약 80% 감소",
+      "실행계획 분석으로 대량 삭제 병목을 찾아 처리 시간 10초 → 2초",
+      "로봇·재고 실시간 위치 데이터를 RabbitMQ 비동기 처리로 전환해 전송 성능 20~50% 개선",
+      "LGL 마이크로 풀필먼트에서 데이터 모델 설계와 프로젝트 리딩, 해외 로봇 API 분석·연동·문서화",
+    ],
+    tags: ["대용량 처리", "장애 격리", "성능 최적화", "온보딩 체계"],
+  },
+];
+
+const education = [
+  { period: "2024.10 ~ 2025.03", name: "글또 10기" },
+  { period: "2023.07 ~ 2024.01", name: "F-Lab Java Backend Mentoring 수료" },
+  { period: "2016.02 ~ 2022.02", name: "대림대학교 스마트소프트웨어학과 공학사" },
+];
+
+const stackGroups = [
+  { name: "언어", items: ["Java", "Kotlin"] },
+  {
+    name: "프레임워크",
+    items: ["Spring Boot", "Spring AOP", "JPA", "MyBatis", "OpenFeign", "Resilience4j"],
+  },
+  {
+    name: "데이터",
+    items: ["MySQL", "PostgreSQL", "Redis", "Redisson", "AWS DocumentDB", "RabbitMQ"],
+  },
+  { name: "인프라", items: ["AWS EC2", "AWS RDS", "GitHub Actions"] },
+];
+
 export default function AboutPage() {
   return (
-    <article className="flex flex-col gap-14">
+    <div className="flex flex-col gap-16">
+      {/* Hero */}
       <header>
-        <p className="text-sm text-muted">{siteConfig.author}</p>
-        <h1 className="mt-2 text-3xl font-semibold tracking-tight">
-          멈추는 지점과 어긋나는 지점을 구조로 고칩니다
-        </h1>
-        <p className="mt-4 max-w-2xl text-muted">
-          물류·WMS 도메인에서 일하는 4년 차 백엔드 개발자입니다. 현장이 멈추면 바로
-          업무가 멈추는 시스템을 다뤄 왔습니다.
+        <p className="text-sm font-medium tracking-wide text-accent">
+          {siteConfig.author} · Backend Engineer
         </p>
-        <ul className="mt-5 flex max-w-2xl flex-col gap-2 text-muted">
-          {strengths.map((item) => (
-            <li key={item} className="flex gap-2">
-              <span aria-hidden="true" className="text-accent">
-                •
-              </span>
-              <span>{item}</span>
+        <h1 className="mt-3 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
+          멈추는 지점과 어긋나는 지점을
+          <br className="hidden sm:block" /> 구조로 고칩니다
+        </h1>
+        <p className="mt-5 max-w-2xl text-muted">
+          물류·풀필먼트 도메인에서 일해 온 4년 차 백엔드 개발자입니다. 하루 만 건이
+          넘는 주문과 현장 작업이 걸린 시스템을 다루며, 성능·정합성·장애 문제를
+          분석하고 구조로 해결해 왔습니다.
+        </p>
+
+        <dl className="mt-8 grid gap-px overflow-hidden rounded-xl border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">
+          {stats.map((stat) => (
+            <div key={stat.label} className="bg-surface px-4 py-5">
+              <dt className="sr-only">{stat.label}</dt>
+              <dd>
+                <p className="text-lg font-semibold tracking-tight text-accent">
+                  {stat.value}
+                </p>
+                <p className="mt-1 text-xs text-muted">{stat.label}</p>
+              </dd>
+            </div>
+          ))}
+        </dl>
+
+        <ul className="mt-8 grid gap-5 sm:grid-cols-3">
+          {principles.map((item) => (
+            <li key={item.title}>
+              <p className="text-sm font-semibold tracking-tight">{item.title}</p>
+              <p className="mt-1.5 text-sm leading-relaxed text-muted">{item.body}</p>
             </li>
           ))}
         </ul>
       </header>
 
-      <section aria-labelledby="projects">
-        <h2 id="projects" className="text-xl font-semibold tracking-tight">
-          주요 작업
-        </h2>
-        <ul className="mt-5 flex flex-col gap-4">
+      {/* 대표 작업 */}
+      <section aria-labelledby="projects" className="flex flex-col gap-5">
+        <SectionHeading
+          id="projects"
+          title="대표 작업"
+          description="실제로 겪은 문제입니다. 각 항목은 그때의 판단 과정을 적어둔 글로 이어집니다."
+        />
+
+        <ol className="flex flex-col gap-5">
           {projects.map((project) => (
             <li
-              key={project.title}
-              className="rounded-lg border border-border bg-surface p-5 shadow-[var(--shadow)]"
+              key={project.slug}
+              className="overflow-hidden rounded-xl border border-border bg-surface shadow-[var(--shadow)]"
             >
-              <p className="text-xs font-medium text-accent">{project.domain}</p>
-              <h3 className="mt-2 text-lg font-semibold tracking-tight">
-                {project.title}
-              </h3>
-
-              <dl className="mt-4 flex flex-col gap-4 text-sm">
-                <div>
-                  <dt className="font-medium text-foreground">상황</dt>
-                  <dd className="mt-1 text-muted">
-                    <RichText text={project.problem} />
-                  </dd>
-                </div>
-                <div>
-                  <dt className="font-medium text-foreground">한 일</dt>
-                  <dd>
-                    <ul className="mt-1 list-disc space-y-1.5 pl-5 text-muted">
-                      {project.decisions.map((decision) => (
-                        <li key={decision}>
-                          <RichText text={decision} />
-                        </li>
-                      ))}
-                    </ul>
-                  </dd>
-                </div>
-                <div>
-                  <dt className="font-medium text-foreground">결과</dt>
-                  <dd className="mt-1 text-muted">
-                    <RichText text={project.result} />
-                  </dd>
-                </div>
-              </dl>
-
-              <ul className="mt-4 flex flex-wrap gap-2" aria-label="사용 기술">
-                {project.stack.map((item) => (
-                  <li
-                    key={item}
-                    className="rounded-md border border-border px-2 py-0.5 text-xs text-muted"
+              <div className="border-b border-border px-5 py-4 sm:px-6">
+                <div className="flex items-baseline gap-3">
+                  <span
+                    aria-hidden="true"
+                    className="text-sm font-semibold tabular-nums text-accent"
                   >
-                    {item}
-                  </li>
-                ))}
-              </ul>
+                    {project.no}
+                  </span>
+                  <span className="text-xs font-medium text-muted">
+                    {project.domain}
+                  </span>
+                </div>
+                <h3 className="mt-2 text-lg font-semibold leading-snug tracking-tight">
+                  {project.title}
+                </h3>
+              </div>
 
-              {project.slug ? (
-                <p className="mt-4">
-                  <Link
-                    href={`/posts/${project.slug}/`}
-                    className="text-sm text-accent hover:text-accent-hover"
-                  >
-                    자세한 기록 읽기 →
-                  </Link>
+              <div className="flex flex-col gap-5 px-5 py-5 sm:px-6">
+                <p className="text-sm leading-relaxed text-muted">
+                  <RichText text={project.problem} />
                 </p>
-              ) : null}
-            </li>
-          ))}
-        </ul>
-      </section>
 
-      <section aria-labelledby="decisions">
-        <h2 id="decisions" className="text-xl font-semibold tracking-tight">
-          기술 판단 기록
-        </h2>
-        <dl className="mt-5 flex flex-col gap-5">
-          {decisions.map((decision) => (
-            <div key={decision.slug}>
-              <dt className="font-medium">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted">
+                    한 일
+                  </p>
+                  <ul className="mt-2 flex flex-col gap-2">
+                    {project.actions.map((action) => (
+                      <li
+                        key={action}
+                        className="flex gap-2.5 text-sm leading-relaxed text-muted"
+                      >
+                        <span
+                          aria-hidden="true"
+                          className="mt-2 size-1 shrink-0 rounded-full bg-accent"
+                        />
+                        <span>
+                          <RichText text={action} />
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+
+                <div className="rounded-lg border border-border px-4 py-3">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-muted">
+                    결과
+                  </p>
+                  <p className="mt-1.5 text-sm leading-relaxed">
+                    <RichText text={project.result} />
+                  </p>
+                </div>
+
+                <dl className="grid gap-3 sm:grid-cols-3">
+                  {project.metrics.map((metric) => (
+                    <div key={metric.label}>
+                      <dt className="sr-only">{metric.label}</dt>
+                      <dd>
+                        <p className="text-sm font-semibold tracking-tight">
+                          {metric.value}
+                        </p>
+                        <p className="mt-0.5 text-xs text-muted">{metric.label}</p>
+                      </dd>
+                    </div>
+                  ))}
+                </dl>
+              </div>
+
+              <div className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-5 py-4 sm:px-6">
+                <ul className="flex flex-wrap gap-1.5" aria-label="사용 기술">
+                  {project.stack.map((item) => (
+                    <li
+                      key={item}
+                      className="rounded-md border border-border px-2 py-0.5 text-xs text-muted"
+                    >
+                      {item}
+                    </li>
+                  ))}
+                </ul>
                 <Link
-                  href={`/posts/${decision.slug}/`}
-                  className="hover:text-accent"
+                  href={`/posts/${project.slug}/`}
+                  className="text-sm font-medium text-accent hover:text-accent-hover"
                 >
-                  {decision.title}
+                  자세한 기록 읽기 →
                 </Link>
-              </dt>
-              <dd className="mt-1 text-muted">
-                <RichText text={decision.body} />
-              </dd>
-            </div>
-          ))}
-        </dl>
-      </section>
-
-      <section aria-labelledby="career">
-        <h2 id="career" className="text-xl font-semibold tracking-tight">
-          경력
-        </h2>
-        <ol className="mt-5 flex flex-col gap-6">
-          {careers.map((career) => (
-            <li key={career.period} className="border-l-2 border-border pl-4">
-              <p className="text-sm text-muted">{career.period}</p>
-              <h3 className="mt-1 font-semibold tracking-tight">{career.domain}</h3>
-              <p className="mt-2 text-sm text-muted">{career.summary}</p>
+              </div>
             </li>
           ))}
         </ol>
       </section>
 
-      <section aria-labelledby="stack">
-        <h2 id="stack" className="text-xl font-semibold tracking-tight">
-          기술 스택
-        </h2>
-        <dl className="mt-5 flex flex-col gap-4">
+      {/* 그 외 성과 */}
+      <section aria-labelledby="achievements" className="flex flex-col gap-5">
+        <SectionHeading
+          id="achievements"
+          title="그 외 주요 성과"
+          description="글로 따로 정리하지는 않았지만 실무에서 직접 만든 변화입니다."
+        />
+        <ul className="grid gap-x-8 gap-y-6 sm:grid-cols-2">
+          {achievements.map((item) => (
+            <li key={item.title}>
+              <p className="text-sm font-semibold tracking-tight">{item.title}</p>
+              <p className="mt-1.5 text-sm leading-relaxed text-muted">
+                <RichText text={item.body} />
+              </p>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {/* 기술 판단 기록 */}
+      <section aria-labelledby="decisions" className="flex flex-col gap-5">
+        <SectionHeading
+          id="decisions"
+          title="기술 판단 기록"
+          description="선택의 근거와, 나중에 틀렸다고 확인한 것까지 남깁니다."
+        />
+        <ul className="grid gap-4 sm:grid-cols-2">
+          {decisions.map((decision) => (
+            <li
+              key={decision.slug}
+              className="flex flex-col rounded-xl border border-border p-5"
+            >
+              <p className="text-xs font-medium text-accent">{decision.tag}</p>
+              <h3 className="mt-2 font-semibold leading-snug tracking-tight">
+                <RichText text={decision.title} />
+              </h3>
+              <p className="mt-2 flex-1 text-sm leading-relaxed text-muted">
+                <RichText text={decision.body} />
+              </p>
+              <p className="mt-4">
+                <Link
+                  href={`/posts/${decision.slug}/`}
+                  className="text-sm font-medium text-accent hover:text-accent-hover"
+                >
+                  읽기 →
+                </Link>
+              </p>
+            </li>
+          ))}
+        </ul>
+      </section>
+
+      {/* 개인 프로젝트 */}
+      <section aria-labelledby="side" className="flex flex-col gap-5">
+        <SectionHeading
+          id="side"
+          title="개인 프로젝트"
+          description="실제로 배포해 운영한 서비스입니다."
+        />
+        <div className="rounded-xl border border-border bg-surface p-5 shadow-[var(--shadow)] sm:p-6">
+          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <h3 className="text-lg font-semibold tracking-tight">
+              {sideProject.name}
+            </h3>
+            <span className="text-sm tabular-nums text-muted">
+              {sideProject.period}
+            </span>
+          </div>
+          <p className="mt-2 text-sm leading-relaxed text-muted">
+            {sideProject.summary}
+          </p>
+          <ul className="mt-4 flex flex-col gap-2">
+            {sideProject.points.map((point) => (
+              <li
+                key={point}
+                className="flex gap-2.5 text-sm leading-relaxed text-muted"
+              >
+                <span
+                  aria-hidden="true"
+                  className="mt-2 size-1 shrink-0 rounded-full bg-accent"
+                />
+                <span>{point}</span>
+              </li>
+            ))}
+          </ul>
+          <ul className="mt-4 flex flex-wrap gap-1.5" aria-label="사용 기술">
+            {sideProject.stack.map((item) => (
+              <li
+                key={item}
+                className="rounded-md border border-border px-2 py-0.5 text-xs text-muted"
+              >
+                {item}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-4 flex flex-wrap gap-4 text-sm">
+            <a
+              href={sideProject.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-accent hover:text-accent-hover"
+            >
+              서비스 보기 →
+            </a>
+            <a
+              href={sideProject.repo}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-accent hover:text-accent-hover"
+            >
+              GitHub →
+            </a>
+          </p>
+        </div>
+      </section>
+
+      {/* 경력 */}
+      <section aria-labelledby="career" className="flex flex-col gap-5">
+        <SectionHeading id="career" title="경력" />
+        <ol className="flex flex-col">
+          {careers.map((career, index) => (
+            <li
+              key={career.period}
+              className={`relative pl-6 ${
+                index === careers.length - 1 ? "" : "pb-10"
+              }`}
+            >
+              <span
+                aria-hidden="true"
+                className="absolute left-0 top-1.5 size-2.5 rounded-full border-2 border-accent bg-background"
+              />
+              {index === careers.length - 1 ? null : (
+                <span
+                  aria-hidden="true"
+                  className="absolute bottom-0 left-[4px] top-5 w-px bg-border"
+                />
+              )}
+              <p className="text-sm tabular-nums text-muted">{career.period}</p>
+              <h3 className="mt-1 font-semibold tracking-tight">{career.org}</h3>
+              <p className="text-sm text-muted">{career.role}</p>
+              <p className="mt-2 text-sm font-medium">{career.headline}</p>
+              <ul className="mt-2 flex flex-col gap-1.5">
+                {career.points.map((point) => (
+                  <li
+                    key={point}
+                    className="flex gap-2.5 text-sm leading-relaxed text-muted"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="mt-2 size-1 shrink-0 rounded-full bg-border"
+                    />
+                    <span>{point}</span>
+                  </li>
+                ))}
+              </ul>
+              <ul className="mt-3 flex flex-wrap gap-1.5">
+                {career.tags.map((tag) => (
+                  <li
+                    key={tag}
+                    className="rounded-md border border-border px-2 py-0.5 text-xs text-muted"
+                  >
+                    {tag}
+                  </li>
+                ))}
+              </ul>
+            </li>
+          ))}
+        </ol>
+      </section>
+
+      {/* 기술 스택 */}
+      <section aria-labelledby="stack" className="flex flex-col gap-5">
+        <SectionHeading id="stack" title="기술 스택" />
+        <dl className="flex flex-col gap-4">
           {stackGroups.map((group) => (
-            <div key={group.name} className="flex flex-col gap-2 sm:flex-row sm:gap-4">
-              <dt className="w-20 shrink-0 text-sm text-muted">{group.name}</dt>
+            <div key={group.name} className="flex flex-col gap-2 sm:flex-row sm:gap-5">
+              <dt className="w-20 shrink-0 pt-1 text-sm text-muted">{group.name}</dt>
               <dd>
                 <ul className="flex flex-wrap gap-2">
                   {group.items.map((item) => (
@@ -302,11 +623,30 @@ export default function AboutPage() {
         </dl>
       </section>
 
-      <section aria-labelledby="links">
+      {/* 학력·활동 */}
+      <section aria-labelledby="education" className="flex flex-col gap-5">
+        <SectionHeading id="education" title="학력 · 활동" />
+        <dl className="flex flex-col gap-3">
+          {education.map((item) => (
+            <div key={item.name} className="flex flex-col gap-1 sm:flex-row sm:gap-5">
+              <dt className="w-40 shrink-0 text-sm tabular-nums text-muted">
+                {item.period}
+              </dt>
+              <dd className="text-sm">{item.name}</dd>
+            </div>
+          ))}
+        </dl>
+      </section>
+
+      {/* 링크 */}
+      <section
+        aria-labelledby="links"
+        className="rounded-xl border border-border bg-surface px-5 py-5 sm:px-6"
+      >
         <h2 id="links" className="text-xl font-semibold tracking-tight">
           링크
         </h2>
-        <ul className="mt-4 flex flex-col gap-2 text-muted">
+        <ul className="mt-3 flex flex-col gap-2 text-sm text-muted">
           <li>
             GitHub{" "}
             <a
@@ -322,9 +662,10 @@ export default function AboutPage() {
             <Link href="/posts/" className="text-accent hover:text-accent-hover">
               전체 글 보기
             </Link>
+            <span> — 문제와 판단 과정을 기록합니다</span>
           </li>
         </ul>
       </section>
-    </article>
+    </div>
   );
 }
