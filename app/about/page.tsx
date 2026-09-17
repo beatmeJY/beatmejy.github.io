@@ -191,22 +191,46 @@ const decisions: Decision[] = [
   },
 ];
 
-const sideProject = {
-  name: "Dailyge",
-  period: "2024.06 ~ 2024.11",
-  summary:
-    "일정과 목표 달성률을 관리하는 웹 서비스입니다. 사용자 도메인을 맡아 인증·성능·품질 영역을 담당했고, 직접 배포해 운영까지 했습니다. 지금은 서비스를 내렸습니다.",
-  repo: "https://github.com/dailyge/dailyge-server",
-  points: [
-    "회원가입 부하 테스트에서 TPS가 300에 머물러, 채번 테이블로 PK 생성과 저장을 분리했습니다.",
-    "CPU가 100%에서 내려오지 않아 힙 덤프를 떴더니 커넥션 핸들러에서 누수가 있었습니다. 초당 약 1,000개 커넥션을 감당하지 못해 GC가 계속 돌던 것이라, 부하 테스트로 적정 스레드 수 300을 찾아 TPS 1,100까지 올렸습니다.",
-    "자주 조회되는 사용자 정보에 Look-Aside 캐시와 TTL 30일을 두고 로그인 시 이벤트로 갱신되게 해 TPS 1,800을 달성했습니다.",
-    "JWT는 전체가 아니라 Payload만 암호화했습니다. 전체를 암호화하면 잘못된 토큰도 복호화해야 알 수 있어서, 구조와 만료를 먼저 검증할 수 있게 했습니다.",
-    "테스트 300여 개로 커버리지 80% 이상을 유지하고, RestDocs와 Swagger로 테스트가 통과할 때만 문서가 생성되게 했습니다.",
-    "팀에 프론트엔드 개발자가 없어 React와 TypeScript를 두 달 만에 익혀 UI를 만들고 팀에 공유했습니다.",
-  ],
-  stack: ["Java 17", "Spring Boot 3", "Redis", "MySQL", "JUnit 5", "RestDocs", "React"],
+type SideProject = {
+  name: string;
+  period: string;
+  summary: string;
+  points: string[];
+  stack: string[];
+  repo?: string;
+  repoLabel?: string;
 };
+
+const sideProjects: SideProject[] = [
+  {
+    name: "Dailyge",
+    period: "2024.06 ~ 2024.11",
+    summary:
+      "일정과 목표 달성률을 관리하는 웹 서비스입니다. 사용자 도메인을 맡아 인증·성능·품질 영역을 담당했고, 직접 배포해 운영까지 했습니다. 지금은 서비스를 내렸습니다.",
+    repo: "https://github.com/dailyge/dailyge-server",
+    points: [
+      "회원가입 부하 테스트에서 TPS가 300에 머물러, 채번 테이블로 PK 생성과 저장을 분리했습니다.",
+      "CPU가 100%에서 내려오지 않아 힙 덤프를 떴더니 커넥션 핸들러에서 누수가 있었습니다. 초당 약 1,000개 커넥션을 감당하지 못해 GC가 계속 돌던 것이라, 부하 테스트로 적정 스레드 수 300을 찾아 TPS 1,100까지 올렸습니다.",
+      "자주 조회되는 사용자 정보에 Look-Aside 캐시와 TTL 30일을 두고 로그인 시 이벤트로 갱신되게 해 TPS 1,800을 달성했습니다.",
+      "JWT는 전체가 아니라 Payload만 암호화했습니다. 전체를 암호화하면 잘못된 토큰도 복호화해야 알 수 있어서, 구조와 만료를 먼저 검증할 수 있게 했습니다.",
+      "테스트 300여 개로 커버리지 80% 이상을 유지하고, RestDocs와 Swagger로 테스트가 통과할 때만 문서가 생성되게 했습니다.",
+      "팀에 프론트엔드 개발자가 없어 React와 TypeScript를 두 달 만에 익혀 UI를 만들고 팀에 공유했습니다.",
+    ],
+    stack: ["Java 17", "Spring Boot 3", "Redis", "MySQL", "JUnit 5", "RestDocs", "React"],
+  },
+  {
+    name: "이 블로그 · 멀티 에이전트 운용",
+    period: "2025 ~",
+    summary:
+      "Cursor와 Claude를 독립 에이전트로 두고, 같은 요구를 각자 구현한 뒤 서로 코드리뷰하게 운영하는 실험입니다. 토이 프로젝트이지만, AI 출력을 그대로 받지 않고 리뷰·머지·제품 판단을 사람이 닫는 흐름을 만들어 보는 게 목적입니다.",
+    repo: "https://github.com/beatmeJY/beatmejy.github.io",
+    points: [
+      "git worktree로 에이전트별 브랜치를 분리하고, 리뷰는 전용 GitHub 계정으로 남깁니다.",
+      "정합성·동시성·장애 처리를 우선으로 리뷰하고, 합리적인 설계가 둘 다라면 사람이 고릅니다.",
+    ],
+    stack: ["Cursor", "Claude", "git worktree", "GitHub"],
+  },
+];
 
 type Career = {
   period: string;
@@ -481,55 +505,64 @@ export default function AboutPage() {
         <SectionHeading
           id="side"
           title="개인 프로젝트"
-          description="직접 만들어 배포하고 운영해 본 서비스입니다."
+          description="만들어 운영했거나, 지금 실험 중인 것들입니다."
         />
-        <div className="rounded-xl border border-border bg-surface p-5 shadow-[var(--shadow)] sm:p-6">
-          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <h3 className="text-lg font-semibold tracking-tight">
-              {sideProject.name}
-            </h3>
-            <span className="text-sm tabular-nums text-muted">
-              {sideProject.period}
-            </span>
-          </div>
-          <p className="mt-2 text-sm leading-relaxed text-muted">
-            {sideProject.summary}
-          </p>
-          <ul className="mt-4 flex flex-col gap-2">
-            {sideProject.points.map((point) => (
-              <li
-                key={point}
-                className="flex gap-2.5 text-sm leading-relaxed text-muted"
-              >
-                <span
-                  aria-hidden="true"
-                  className="mt-2 size-1 shrink-0 rounded-full bg-accent"
-                />
-                <span>{point}</span>
-              </li>
-            ))}
-          </ul>
-          <ul className="mt-4 flex flex-wrap gap-1.5" aria-label="사용 기술">
-            {sideProject.stack.map((item) => (
-              <li
-                key={item}
-                className="rounded-md border border-border px-2 py-0.5 text-xs text-muted"
-              >
-                {item}
-              </li>
-            ))}
-          </ul>
-          <p className="mt-4 flex flex-wrap gap-4 text-sm">
-            <a
-              href={sideProject.repo}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-medium text-accent hover:text-accent-hover"
+        <ul className="flex flex-col gap-4">
+          {sideProjects.map((project) => (
+            <li
+              key={project.name}
+              className="rounded-xl border border-border bg-surface p-5 shadow-[var(--shadow)] sm:p-6"
             >
-              GitHub →
-            </a>
-          </p>
-        </div>
+              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                <h3 className="text-lg font-semibold tracking-tight">
+                  {project.name}
+                </h3>
+                <span className="text-sm tabular-nums text-muted">
+                  {project.period}
+                </span>
+              </div>
+              <p className="mt-2 text-sm leading-relaxed text-muted">
+                {project.summary}
+              </p>
+              <ul className="mt-4 flex flex-col gap-2">
+                {project.points.map((point) => (
+                  <li
+                    key={point}
+                    className="flex gap-2.5 text-sm leading-relaxed text-muted"
+                  >
+                    <span
+                      aria-hidden="true"
+                      className="mt-2 size-1 shrink-0 rounded-full bg-accent"
+                    />
+                    <span>{point}</span>
+                  </li>
+                ))}
+              </ul>
+              <ul className="mt-4 flex flex-wrap gap-1.5" aria-label="사용 기술">
+                {project.stack.map((item) => (
+                  <li
+                    key={item}
+                    className="rounded-md border border-border px-2 py-0.5 text-xs text-muted"
+                  >
+                    {item}
+                  </li>
+                ))}
+              </ul>
+              {project.repo ? (
+                <p className="mt-4 flex flex-wrap gap-4 text-sm">
+                  <a
+                    href={project.repo}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="font-medium text-accent hover:text-accent-hover"
+                  >
+                    {project.repoLabel ?? "GitHub →"}
+                  </a>
+                </p>
+              ) : null}
+            </li>
+          ))}
+        </ul>
       </section>
 
       {/* 경력 */}
