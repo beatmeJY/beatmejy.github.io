@@ -195,8 +195,7 @@ const sideProject = {
   name: "Dailyge",
   period: "2024.06 ~ 2024.11",
   summary:
-    "일정과 목표 달성률을 관리하는 웹 서비스입니다. 사용자 도메인을 맡아 인증·성능·품질 영역을 담당했고, 실제로 배포해 운영했습니다.",
-  href: "https://www.dailyge.com/",
+    "일정과 목표 달성률을 관리하는 웹 서비스입니다. 사용자 도메인을 맡아 인증·성능·품질 영역을 담당했고, 직접 배포해 운영까지 했습니다. 지금은 서비스를 내렸습니다.",
   repo: "https://github.com/dailyge/dailyge-server",
   points: [
     "회원가입 부하 테스트에서 TPS가 300에 머물러, 채번 테이블로 PK 생성과 저장을 분리했습니다.",
@@ -482,7 +481,7 @@ export default function AboutPage() {
         <SectionHeading
           id="side"
           title="개인 프로젝트"
-          description="실제로 배포해 운영한 서비스입니다."
+          description="직접 만들어 배포하고 운영해 본 서비스입니다."
         />
         <div className="rounded-xl border border-border bg-surface p-5 shadow-[var(--shadow)] sm:p-6">
           <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
@@ -521,14 +520,6 @@ export default function AboutPage() {
             ))}
           </ul>
           <p className="mt-4 flex flex-wrap gap-4 text-sm">
-            <a
-              href={sideProject.href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="font-medium text-accent hover:text-accent-hover"
-            >
-              서비스 보기 →
-            </a>
             <a
               href={sideProject.repo}
               target="_blank"
