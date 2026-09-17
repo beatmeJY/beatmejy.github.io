@@ -53,7 +53,7 @@ function SectionHeading({
 const stats = [
   { value: "4년", label: "백엔드 경력" },
   { value: "물류 · 풀필먼트", label: "주력 도메인" },
-  { value: "WMS 자체 구축", label: "입고부터 반품까지" },
+  { value: "WMS 자체 구축", label: "입고부터 모든 공정" },
   { value: "10,000건+", label: "일 평균 처리 주문" },
 ];
 
@@ -656,7 +656,8 @@ export default function AboutPage() {
             <span> — 문제와 판단 과정을 기록합니다</span>
           </li>
           <li>
-            이 블로그는 {siteConfig.author}라는 이름으로 씁니다
+            이 블로그는 {siteConfig.author}라는 이름으로 씁니다. &ldquo;나 자신을
+            이기자&rdquo;는 뜻으로 지었습니다.
           </li>
         </ul>
       </section>
