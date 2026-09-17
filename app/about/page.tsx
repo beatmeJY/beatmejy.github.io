@@ -5,7 +5,7 @@ import { siteConfig } from "@/lib/site";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "물류·풀필먼트 도메인 4년 차 백엔드 개발자 beatmeJY의 포트폴리오입니다. 장애 격리, 분산 환경 동시성, 이벤트 기반 책임 분리, 대용량 처리 최적화 경험을 사례로 정리했습니다.",
+    "물류·풀필먼트 도메인 4년 차 백엔드 개발자 최지율(beatmeJY)의 포트폴리오입니다. 장애 격리, 분산 환경 동시성, 이벤트 기반 책임 분리, 대용량 처리 최적화 경험을 사례로 정리했습니다.",
   alternates: { canonical: "/about/" },
 };
 
@@ -52,9 +52,9 @@ function SectionHeading({
 
 const stats = [
   { value: "4년", label: "백엔드 경력" },
+  { value: "물류 · 풀필먼트", label: "주력 도메인" },
+  { value: "WMS 자체 구축", label: "입고부터 반품까지" },
   { value: "10,000건+", label: "일 평균 처리 주문" },
-  { value: "60s → 3~15s", label: "장애 시 요청당 점유 시간" },
-  { value: "300 → 1,800", label: "부하 테스트 TPS 개선" },
 ];
 
 const principles = [
@@ -156,29 +156,6 @@ const projects: Project[] = [
   },
 ];
 
-const achievements = [
-  {
-    title: "대량 삭제 10초 → 2초",
-    body: "주문 API가 매 요청마다 1,000건 이상을 보내왔고, 같은 주문 번호가 갱신되면 기존 데이터를 지우고 다시 넣어야 했습니다. `deleteAll`은 연관 테이블이 많아 10초 넘게 걸렸습니다. EXPLAIN으로 병목을 확인하고, 연관 테이블을 주문 ID로 인덱싱해 PK를 먼저 조회한 뒤 MyBatis `IN` 쿼리로 일괄 삭제하도록 바꿨습니다.",
-  },
-  {
-    title: "동기 스케줄러를 트랜잭션 이벤트 + 비동기로",
-    body: "5초 주기로 반복 전송하던 구조가 작업량이 늘면 병목이 될 거라고 봤습니다. 트랜잭션 이벤트와 Async 기반 실시간 전송으로 바꿔, 요청 증가에 대응할 수 있는 구조를 만들었습니다.",
-  },
-  {
-    title: "로봇 128대 위치 전송을 RabbitMQ로",
-    body: "실시간성이 덜 중요한 통계 데이터는 30초·5분 주기 배치로 모아 보내고, 즉시성이 필요한 로봇 위치는 HTTP 대신 메시지 큐로 넘겼습니다. 연결 비용과 응답 지연을 줄여 전송 성능을 20~50% 개선했습니다.",
-  },
-  {
-    title: "AOP 기반 외부 API 이력 전수 수집",
-    body: "주문 하나당 20개가 넘는 API를 주고받아 정합성이 중요했습니다. 외부 인터페이스 컨트롤러에 AOP를 걸어 성공·실패를 가리지 않고 모든 이력을 남기고, 실패 건을 관리자가 바로 재전송할 수 있는 UI까지 제공했습니다.",
-  },
-  {
-    title: "온보딩 문서화와 코드 품질 개선",
-    body: "복잡한 물류 도메인 탓에 신규 입사자가 헤매는 걸 보고, 입사 초기 정리해둔 내용을 문서화해 공유했습니다. 오프라인 코드리뷰와 SonarQube를 함께 도입해, 인턴이 3개월 만에 실무 프로젝트에 투입될 수 있었습니다.",
-  },
-];
-
 type Decision = {
   tag: string;
   title: string;
@@ -231,7 +208,17 @@ const sideProject = {
   stack: ["Java 17", "Spring Boot 3", "Redis", "MySQL", "JUnit 5", "RestDocs", "React"],
 };
 
-const careers = [
+type Career = {
+  period: string;
+  org: string;
+  role: string;
+  headline: string;
+  points: string[];
+  tags: string[];
+  kind?: "work" | "break";
+};
+
+const careers: Career[] = [
   {
     period: "2024.12 ~ 2026.02",
     org: "코너로지스",
@@ -247,6 +234,19 @@ const careers = [
     tags: ["WMS", "도메인 모델링", "이벤트 기반 분리", "분산 락"],
   },
   {
+    period: "2023.05 ~ 2024.11",
+    org: "학습과 개인 프로젝트",
+    role: "경력 전환 준비",
+    headline: "멘토링으로 기본기를 다시 잡고, 직접 서비스를 만들어 배포·운영했습니다",
+    points: [
+      "F-Lab Java Backend 멘토링에서 2:1 코드 리뷰로 객체지향 설계·테스트·리팩토링을 다시 익혔습니다",
+      "일정 관리 서비스 Dailyge를 만들어 실제로 배포하고 운영하며, 부하 테스트와 힙 덤프로 성능을 직접 개선했습니다",
+      "글또 10기에 참여해 학습한 내용을 글로 정리하는 습관을 들였습니다",
+    ],
+    tags: ["F-Lab 멘토링", "Dailyge 개발·운영", "글또 10기"],
+    kind: "break",
+  },
+  {
     period: "2020.10 ~ 2023.04",
     org: "Studio 3S Korea",
     role: "Backend Engineer · S/W팀",
@@ -257,7 +257,9 @@ const careers = [
       "외부 API 장애로 인한 Thread Pool 고갈을 분석하고 Circuit Breaker로 대기 비용 약 80% 감소",
       "실행계획 분석으로 대량 삭제 병목을 찾아 처리 시간 10초 → 2초",
       "로봇·재고 실시간 위치 데이터를 RabbitMQ 비동기 처리로 전환해 전송 성능 20~50% 개선",
+      "외부 인터페이스 컨트롤러에 AOP를 걸어 성공·실패 이력을 전수 수집하고, 실패 건 재전송 UI 제공",
       "LGL 마이크로 풀필먼트에서 데이터 모델 설계와 프로젝트 리딩, 해외 로봇 API 분석·연동·문서화",
+      "온보딩 문서화와 오프라인 코드리뷰, SonarQube 도입으로 신규 입사자 적응 지원",
     ],
     tags: ["대용량 처리", "장애 격리", "성능 최적화", "온보딩 체계"],
   },
@@ -288,7 +290,7 @@ export default function AboutPage() {
       {/* Hero */}
       <header>
         <p className="text-sm font-medium tracking-wide text-accent">
-          {siteConfig.author} · Backend Engineer
+          최지율 · Backend Engineer
         </p>
         <h1 className="mt-3 text-3xl font-semibold leading-tight tracking-tight sm:text-4xl">
           멈추는 지점과 어긋나는 지점을
@@ -429,25 +431,6 @@ export default function AboutPage() {
         </ol>
       </section>
 
-      {/* 그 외 성과 */}
-      <section aria-labelledby="achievements" className="flex flex-col gap-5">
-        <SectionHeading
-          id="achievements"
-          title="그 외 주요 성과"
-          description="글로 따로 정리하지는 않았지만 실무에서 직접 만든 변화입니다."
-        />
-        <ul className="grid gap-x-8 gap-y-6 sm:grid-cols-2">
-          {achievements.map((item) => (
-            <li key={item.title}>
-              <p className="text-sm font-semibold tracking-tight">{item.title}</p>
-              <p className="mt-1.5 text-sm leading-relaxed text-muted">
-                <RichText text={item.body} />
-              </p>
-            </li>
-          ))}
-        </ul>
-      </section>
-
       {/* 기술 판단 기록 */}
       <section aria-labelledby="decisions" className="flex flex-col gap-5">
         <SectionHeading
@@ -558,7 +541,9 @@ export default function AboutPage() {
             >
               <span
                 aria-hidden="true"
-                className="absolute left-0 top-1.5 size-2.5 rounded-full border-2 border-accent bg-background"
+                className={`absolute left-0 top-1.5 size-2.5 rounded-full border-2 bg-background ${
+                  career.kind === "break" ? "border-border" : "border-accent"
+                }`}
               />
               {index === careers.length - 1 ? null : (
                 <span
@@ -567,7 +552,13 @@ export default function AboutPage() {
                 />
               )}
               <p className="text-sm tabular-nums text-muted">{career.period}</p>
-              <h3 className="mt-1 font-semibold tracking-tight">{career.org}</h3>
+              <h3
+                className={`mt-1 font-semibold tracking-tight ${
+                  career.kind === "break" ? "text-muted" : ""
+                }`}
+              >
+                {career.org}
+              </h3>
               <p className="text-sm text-muted">{career.role}</p>
               <p className="mt-2 text-sm font-medium">{career.headline}</p>
               <ul className="mt-2 flex flex-col gap-1.5">
@@ -663,6 +654,9 @@ export default function AboutPage() {
               전체 글 보기
             </Link>
             <span> — 문제와 판단 과정을 기록합니다</span>
+          </li>
+          <li>
+            이 블로그는 {siteConfig.author}라는 이름으로 씁니다
           </li>
         </ul>
       </section>
