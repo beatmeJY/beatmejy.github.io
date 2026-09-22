@@ -21,7 +21,7 @@ export type Post = {
   tags: string[];
   category: string;
   categorySlug: CategorySlug;
-  /** 메인(홈) 인기 글 순위. 클수록 위. 없으면 홈 인기 목록에 안 나옴. */
+  /** 메인(홈) 대표 글 순위. 클수록 위. 없으면 홈 대표 글 목록에 안 나옴. */
   popularRank: number | null;
   draft: boolean;
   content: string;
@@ -106,7 +106,7 @@ export function getAllPosts(options?: { includeDrafts?: boolean }): Post[] {
     .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
 }
 
-/** 메인 홈용. `popularRank`가 있는 글만, 순위 내림차순(큰 수가 가장 위). */
+/** 메인 홈 대표 글. `popularRank`가 있는 글만, 순위 내림차순(큰 수가 가장 위). */
 export function getPopularPosts(options?: { includeDrafts?: boolean }): Post[] {
   return getAllPosts(options)
     .filter((post) => post.popularRank !== null)

@@ -37,7 +37,7 @@ export default function Home() {
       <section aria-labelledby="popular-heading">
         <div className="mb-4 flex items-end justify-between gap-4">
           <h2 id="popular-heading" className="text-xl font-semibold tracking-tight">
-            인기 글
+            대표 글
           </h2>
           <Link href="/posts/" className="text-sm text-muted hover:text-foreground">
             전체 보기
@@ -50,7 +50,7 @@ export default function Home() {
             ))}
           </div>
         ) : (
-          <p className="text-muted">인기 글로 지정된 게시글이 없습니다.</p>
+          <p className="text-muted">대표 글로 지정된 게시글이 없습니다.</p>
         )}
       </section>
 
