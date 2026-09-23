@@ -88,29 +88,6 @@ type Project = {
 const projects: Project[] = [
   {
     no: "01",
-    domain: "Studio 3S Korea · 주문 연동",
-    title: "하위 서버 한 곳이 죽자 우리 서버가 40분간 멈췄다",
-    problem:
-      "일 평균 10,000건이 넘는 주문을 여러 하위 서버로 전달하는 구조였습니다. 전달을 비동기로 바꾼 지 한 달쯤 됐을 때 협력 서버 한 곳이 다운되면서, 200개짜리 스레드 풀이 약 40분 동안 고갈됐습니다. 남의 장애가 왜 우리 장애가 되는지부터 풀어야 했습니다.",
-    actions: [
-      "스레드 덤프에서 워커 대부분이 `TIMED_WAITING`으로 소켓 응답을 기다리고, 대기 시간이 60초 근처에서 끊기는 패턴을 확인했습니다.",
-      "`feign.Request.Options` 소스를 열어 설정하지 않은 기본 readTimeout이 60초라는 것을 특정했습니다. 요청 하나가 스레드를 60초까지 붙잡고 있었습니다.",
-      "하위 서버마다 평소 응답 속도가 달라 일괄 적용 대신 서버별로 타임아웃을 잡았습니다(60초 → 3~15초).",
-      "서킷 브레이커 설정값은 피크 트래픽에서 역산했습니다. 초당 1,000건이면 슬라이딩 윈도 100건이 쌓이는 데 약 0.1초, 실패율 50%면 스레드 풀 200개가 약 0.4초 만에 소진되는 구조였습니다.",
-      "차단이 곧 유실이 되지 않도록 실패 건을 모아 복구 후 재전송하는 배치를 두고, Circuit Open 시 Slack으로 알렸습니다.",
-    ],
-    result:
-      "타임아웃만 줄이거나 Retry를 붙이는 대안도 검토했지만, 실패가 계속되는 동안 호출 자체를 끊어주지 않으면 같은 일이 반복된다고 봤습니다. Timeout과 Circuit Breaker를 함께 두어 장애 전파 경로를 끊었고, 대기 비용을 약 80% 줄였습니다.",
-    metrics: [
-      { value: "약 80% 감소", label: "장애 시 대기 비용" },
-      { value: "60s → 3~15s", label: "요청당 최대 점유" },
-      { value: "1,000 TPS", label: "설정 역산 기준" },
-    ],
-    stack: ["Java", "Spring Async", "OpenFeign", "Resilience4j"],
-    slug: "preventing-thread-blocking-with-circuitBreaker",
-  },
-  {
-    no: "02",
     domain: "코너로지스 · WMS",
     title: "작업 이력과 통계를 업무 API에서 떼어냈다",
     problem:
@@ -123,7 +100,7 @@ const projects: Project[] = [
       "발행 실패분은 RDB에 실패 이력으로 적재하고, 벌크 반영 기능으로 나중에 되메울 수 있게 했습니다.",
     ],
     result:
-      "업무 API에서 이력 코드가 사라졌고, 결과적으로 특정 Controller에 종속되지 않는 공용 이력 처리 경로가 됐습니다. 지금은 WMS 바깥의 공정 시스템도 같은 경로를 씁니다. 완전한 전달 보장은 남은 과제로 기록해뒀습니다.",
+      "업무 API에서 이력 코드가 사라졌고, 결과적으로 특정 Controller에 종속되지 않는 공용 이력 처리 경로가 됐습니다. 지금은 WMS 바깥의 공정 시스템도 같은 경로를 씁니다. 전달 보장은 느슨하게 두는 대신, 실패분을 되메우는 경로를 함께 만들었습니다.",
     metrics: [
       { value: "서버 분리", label: "업무와 이력 처리" },
       { value: "DocumentDB + MySQL", label: "성격별 저장소" },
@@ -133,7 +110,7 @@ const projects: Project[] = [
     slug: "wms-worker-server-history-separation",
   },
   {
-    no: "03",
+    no: "02",
     domain: "코너로지스 · WMS",
     title: "문자열 ID뿐이던 창고를 격자 그래프로 다시 그렸다",
     problem:
@@ -154,6 +131,29 @@ const projects: Project[] = [
     ],
     stack: ["Java", "JPA / JPQL", "MySQL", "그래프 모델링", "Bit Flag"],
     slug: "warehouse-map",
+  },
+  {
+    no: "03",
+    domain: "Studio 3S Korea · 주문 연동",
+    title: "하위 서버 한 곳이 죽자 우리 서버가 40분간 멈췄다",
+    problem:
+      "일 평균 10,000건이 넘는 주문을 여러 하위 서버로 전달하는 구조였습니다. 전달을 비동기로 바꾼 지 한 달쯤 됐을 때 협력 서버 한 곳이 다운되면서, 200개짜리 스레드 풀이 약 40분 동안 고갈됐습니다. 남의 장애가 왜 우리 장애가 되는지부터 풀어야 했습니다.",
+    actions: [
+      "스레드 덤프에서 워커 대부분이 `TIMED_WAITING`으로 소켓 응답을 기다리고, 대기 시간이 60초 근처에서 끊기는 패턴을 확인했습니다.",
+      "`feign.Request.Options` 소스를 열어 설정하지 않은 기본 readTimeout이 60초라는 것을 특정했습니다. 요청 하나가 스레드를 60초까지 붙잡고 있었습니다.",
+      "하위 서버마다 평소 응답 속도가 달라 일괄 적용 대신 서버별로 타임아웃을 잡았습니다(60초 → 3~15초).",
+      "서킷 브레이커 설정값은 피크 트래픽에서 역산했습니다. 초당 1,000건이면 슬라이딩 윈도 100건이 쌓이는 데 약 0.1초, 실패율 50%면 스레드 풀 200개가 약 0.4초 만에 소진되는 구조였습니다.",
+      "차단이 곧 유실이 되지 않도록 실패 건을 모아 복구 후 재전송하는 배치를 두고, Circuit Open 시 Slack으로 알렸습니다.",
+    ],
+    result:
+      "타임아웃만 줄이거나 Retry를 붙이는 대안도 검토했지만, 실패가 계속되는 동안 호출 자체를 끊어주지 않으면 같은 일이 반복된다고 봤습니다. Timeout과 Circuit Breaker를 함께 두어 장애 전파 경로를 끊었고, 대기 비용을 약 80% 줄였습니다.",
+    metrics: [
+      { value: "약 80% 감소", label: "장애 시 대기 비용" },
+      { value: "60s → 3~15s", label: "요청당 최대 점유" },
+      { value: "1,000 TPS", label: "설정 역산 기준" },
+    ],
+    stack: ["Java", "Spring Async", "OpenFeign", "Resilience4j"],
+    slug: "preventing-thread-blocking-with-circuitBreaker",
   },
 ];
 
@@ -184,10 +184,10 @@ const decisions: Decision[] = [
     slug: "session-id-lesson-predictability-over-collision",
   },
   {
-    tag: "기초",
-    title: "`ready()`는 데이터 존재 여부가 아니다",
-    body: '소켓 스트림에서 `ready()`를 "읽을 게 있는지" 확인용으로 쓰다, 두 번째 요청부터 읽기 로직에 진입조차 못 하는 버그를 만들었습니다. 문서 문구만 보면 충분히 착각할 수 있는 메서드라, 구현까지 확인하고서야 non-blocking 판정이라는 걸 알았습니다.',
-    slug: "bufferedReader-ready",
+    tag: "정합성",
+    title: "`@Transactional`이 있는데 롤백되지 않았다",
+    body: "입고 예정일을 바꾸면 두 날짜의 예약 수량이 함께 움직여야 하는데, 롤백 후 한쪽만 되돌아가지 않았습니다. 조회 순서를 바꾸자 증상은 사라졌지만 원인은 아니었고, 끝까지 따라가 보니 레거시 테이블이 MyISAM이었습니다. DB 전체의 MyISAM 테이블을 전수 조사한 뒤, 엔진 변경이 `COUNT(*)` 성능·락 단위·기존 롤백 동작까지 바꾼다는 점을 따져 영향이 없는 테이블부터 순차적으로 InnoDB로 전환했습니다.",
+    slug: "myisam-rollback-failure",
   },
 ];
 
@@ -249,13 +249,15 @@ const careers: Career[] = [
     role: "Backend Engineer · Software Team",
     headline: "입고·적재·상품화·피킹·출고·반품을 통합 관리하는 WMS 자체 시스템 구축",
     points: [
+      "다수 프로젝트를 초기 설계부터 맡아 팀 회의로 방향을 정하고 의사결정까지 이끌었으며, 이후 CTO로부터 프로젝트를 전적으로 위임받아 수행",
+      "현장 작업자를 직접 찾아가 문제와 수정 요청을 받고, 현장의 문제를 발로 뛰며 해결해 시스템에 반영",
       "바코드·RFID 기반 실시간 상품 추적과 로케이션·재고 관리 개발",
       "물류센터 전체 맵을 그래프로 모델링하고 이동 가능 방향을 Bit Flag로 표현",
       "Lock·이벤트 기반 처리로 작업 동시성과 중복 처리 문제 해결",
       "작업 공정·생산량 통계 시스템 구축, 서버 분리 및 DocumentDB 기반 이력 저장 구조 설계",
       "네트워크 지연·중복 스캔 이슈 분석 및 개선, RDS 전환과 EC2 운영 안정화",
     ],
-    tags: ["WMS", "도메인 모델링", "이벤트 기반 분리", "분산 락"],
+    tags: ["WMS", "설계 주도", "현장 밀착", "도메인 모델링", "이벤트 기반 분리"],
   },
   {
     period: "2023.05 ~ 2024.11",
