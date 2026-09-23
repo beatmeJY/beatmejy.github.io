@@ -214,7 +214,7 @@ const sideProjects: SideProject[] = [
       "자주 조회되는 사용자 정보에 Look-Aside 캐시와 TTL 30일을 두고 로그인 시 이벤트로 갱신되게 해 TPS 1,800을 달성했습니다.",
       "JWT는 전체가 아니라 Payload만 암호화했습니다. 전체를 암호화하면 잘못된 토큰도 복호화해야 알 수 있어서, 구조와 만료를 먼저 검증할 수 있게 했습니다.",
       "테스트 300여 개로 커버리지 80% 이상을 유지하고, RestDocs와 Swagger로 테스트가 통과할 때만 문서가 생성되게 했습니다.",
-      "팀에 프론트엔드 개발자가 없어 React와 TypeScript를 두 달 만에 익혀 UI를 만들고 팀에 공유했습니다.",
+      "팀에 프론트엔드 개발자가 없어 React와 TypeScript로 UI까지 맡아 만들고 팀에 공유했습니다.",
     ],
     stack: ["Java 17", "Spring Boot 3", "Redis", "MySQL", "JUnit 5", "RestDocs", "React"],
   },
