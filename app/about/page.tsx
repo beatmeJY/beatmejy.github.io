@@ -220,7 +220,7 @@ const sideProjects: SideProject[] = [
   },
   {
     name: "이 블로그 · 멀티 에이전트 운용",
-    period: "2025 ~",
+    period: "2026.08 ~",
     summary:
       "Cursor와 Claude를 독립 에이전트로 두고, 같은 요구를 각자 구현한 뒤 서로 코드리뷰하게 운영하는 실험입니다. 토이 프로젝트이지만, AI 출력을 그대로 받지 않고 리뷰·머지·제품 판단을 사람이 닫는 흐름을 만들어 보는 게 목적입니다.",
     repo: "https://github.com/beatmeJY/beatmejy.github.io",
