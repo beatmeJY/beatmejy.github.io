@@ -235,10 +235,10 @@ const sideProjects: SideProject[] = [
       "Cursor와 Claude를 독립 에이전트로 두고, 같은 요구를 각자 구현한 뒤 서로 코드리뷰하게 운영하는 실험입니다. 토이 프로젝트이지만, AI 출력을 그대로 받지 않고 리뷰·머지·제품 판단을 사람이 닫는 흐름을 만들어 보는 게 목적입니다.",
     repo: "https://github.com/beatmeJY/beatmejy.github.io",
     points: [
-      "git worktree로 에이전트별 브랜치를 분리하고, 리뷰는 전용 GitHub 계정으로 남깁니다.",
+      "에이전트들이 공통 지침 원본 하나를 함께 읽게 하고, 리뷰는 에이전트별 전용 GitHub 계정으로 남깁니다.",
       "정합성·동시성·장애 처리를 우선으로 리뷰하고, 합리적인 설계가 둘 다라면 사람이 고릅니다.",
     ],
-    stack: ["Cursor", "Claude", "git worktree", "GitHub"],
+    stack: ["Cursor", "Claude", "GitHub"],
   },
 ];
 
