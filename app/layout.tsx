@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
-import { getDevTabConfig } from "@/lib/dev-agent";
 import { siteConfig } from "@/lib/site";
 import "./globals.css";
 
@@ -16,11 +15,9 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const devTab = getDevTabConfig(siteConfig.name);
-
 export const metadata: Metadata = {
   metadataBase: new URL(siteConfig.url),
-  title: devTab?.title ?? {
+  title: {
     default: siteConfig.name,
     template: `%s · ${siteConfig.name}`,
   },

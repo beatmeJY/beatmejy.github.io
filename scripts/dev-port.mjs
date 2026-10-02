@@ -1,94 +1,15 @@
-import { spawnSync } from "node:child_process";
 import { createServer } from "node:net";
-import { basename } from "node:path";
 
-/**
- * 브랜치 → 기본 포트 (폴더명보다 우선).
- * worktree 디렉터리 이름이 달라도 같은 feature 브랜치면 포트가 갈라진다.
- */
-export const BRANCH_PORTS = Object.freeze({
-  main: 3000,
-  "feature/cursor-work": 3001,
-  "feature/claude-work": 3002,
-});
-
-/**
- * 디렉터리명 → 기본 포트 (브랜치 매핑이 없을 때).
- */
-export const WORKTREE_PORTS = Object.freeze({
-  "beatmejy.github.io": 3000,
-  "beatmejy-cursor": 3001,
-  "beatmejy-claude": 3002,
-});
-
-/** 알 수 없는 clone/worktree — main(3000)과 겹치지 않게 시작 */
-export const UNKNOWN_FALLBACK_PORT = 3100;
-
-/**
- * 로컬 dev 탭 구분용 에이전트 식별자.
- * @typedef {'main' | 'cursor' | 'claude' | 'unknown'} DevAgent
- */
-
-/** @type {Readonly<Record<string, DevAgent>>} */
-export const BRANCH_AGENTS = Object.freeze({
-  main: "main",
-  "feature/cursor-work": "cursor",
-  "feature/claude-work": "claude",
-});
-
-/** @type {Readonly<Record<string, DevAgent>>} */
-export const WORKTREE_AGENTS = Object.freeze({
-  "beatmejy.github.io": "main",
-  "beatmejy-cursor": "cursor",
-  "beatmejy-claude": "claude",
-});
+/** PORT 환경변수가 없을 때 쓰는 기본 포트 */
+export const DEFAULT_PORT = 3000;
 
 const PORT_SCAN_LIMIT = 100;
 
 /**
- * @param {string} cwd
- * @returns {string | null}
- */
-export function readGitBranch(cwd) {
-  const result = spawnSync(
-    "git",
-    ["-C", cwd, "rev-parse", "--abbrev-ref", "HEAD"],
-    { encoding: "utf8" },
-  );
-  if (result.status !== 0) return null;
-  const branch = (result.stdout || "").trim();
-  if (!branch || branch === "HEAD") return null;
-  return branch;
-}
-
-/**
- * 브랜치(우선)·디렉터리명으로 로컬 worktree 에이전트를 고른다.
- * @param {string} cwd
- * @param {{ branch?: string | null }} [options]
- * @returns {DevAgent}
- */
-export function resolveDevAgent(cwd, options = {}) {
-  const branch =
-    options.branch !== undefined ? options.branch : readGitBranch(cwd);
-  if (branch && Object.hasOwn(BRANCH_AGENTS, branch)) {
-    return BRANCH_AGENTS[branch];
-  }
-
-  const name = basename(cwd);
-  if (Object.hasOwn(WORKTREE_AGENTS, name)) {
-    return WORKTREE_AGENTS[name];
-  }
-
-  return "unknown";
-}
-
-/**
- * @param {string} cwd
  * @param {NodeJS.ProcessEnv} [env]
- * @param {{ branch?: string | null }} [options]
  * @returns {number}
  */
-export function preferredPort(cwd, env = process.env, options = {}) {
+export function preferredPort(env = process.env) {
   const fromEnv = env.PORT?.trim();
   if (fromEnv) {
     const n = Number(fromEnv);
@@ -98,18 +19,7 @@ export function preferredPort(cwd, env = process.env, options = {}) {
     return n;
   }
 
-  const branch =
-    options.branch !== undefined ? options.branch : readGitBranch(cwd);
-  if (branch && Object.hasOwn(BRANCH_PORTS, branch)) {
-    return BRANCH_PORTS[branch];
-  }
-
-  const name = basename(cwd);
-  if (Object.hasOwn(WORKTREE_PORTS, name)) {
-    return WORKTREE_PORTS[name];
-  }
-
-  return UNKNOWN_FALLBACK_PORT;
+  return DEFAULT_PORT;
 }
 
 /**
@@ -154,13 +64,12 @@ export async function findAvailablePort(start, options = {}) {
 }
 
 /**
- * @param {string} cwd
  * @param {NodeJS.ProcessEnv} [env]
- * @param {{ isFree?: (port: number) => Promise<boolean>, branch?: string | null }} [options]
+ * @param {{ isFree?: (port: number) => Promise<boolean> }} [options]
  * @returns {Promise<{ preferred: number, port: number, redirected: boolean }>}
  */
-export async function resolveDevPort(cwd, env = process.env, options = {}) {
-  const preferred = preferredPort(cwd, env, { branch: options.branch });
+export async function resolveDevPort(env = process.env, options = {}) {
+  const preferred = preferredPort(env);
   const port = await findAvailablePort(preferred, options);
   return {
     preferred,

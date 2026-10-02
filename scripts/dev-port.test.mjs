@@ -2,104 +2,27 @@ import assert from "node:assert/strict";
 import { createServer } from "node:net";
 import { describe, it } from "node:test";
 import {
-  BRANCH_PORTS,
-  UNKNOWN_FALLBACK_PORT,
-  WORKTREE_PORTS,
+  DEFAULT_PORT,
   findAvailablePort,
   nextPortAfter,
   preferredPort,
-  resolveDevAgent,
   resolveDevPort,
 } from "./dev-port.mjs";
 
-describe("resolveDevAgent", () => {
-  it("prefers git branch over directory name", () => {
-    assert.equal(
-      resolveDevAgent("/tmp/weird-name", { branch: "feature/cursor-work" }),
-      "cursor",
-    );
-    assert.equal(
-      resolveDevAgent("/tmp/weird-name", { branch: "feature/claude-work" }),
-      "claude",
-    );
-    assert.equal(resolveDevAgent("/tmp/weird-name", { branch: "main" }), "main");
-  });
-
-  it("maps known worktree directory names when branch unknown", () => {
-    assert.equal(
-      resolveDevAgent("/Users/youl/Projects/beatmejy.github.io", {
-        branch: null,
-      }),
-      "main",
-    );
-    assert.equal(
-      resolveDevAgent("/Users/youl/Projects/beatmejy-cursor", { branch: null }),
-      "cursor",
-    );
-    assert.equal(
-      resolveDevAgent("/Users/youl/Projects/beatmejy-claude", { branch: null }),
-      "claude",
-    );
-  });
-
-  it("returns unknown for unrecognized trees", () => {
-    assert.equal(
-      resolveDevAgent("/tmp/other-clone", { branch: null }),
-      "unknown",
-    );
-  });
-});
-
 describe("preferredPort", () => {
-  it("prefers git branch over directory name", () => {
-    assert.equal(
-      preferredPort("/tmp/weird-name", {}, { branch: "feature/cursor-work" }),
-      BRANCH_PORTS["feature/cursor-work"],
-    );
-    assert.equal(
-      preferredPort("/tmp/weird-name", {}, { branch: "feature/claude-work" }),
-      BRANCH_PORTS["feature/claude-work"],
-    );
-    assert.equal(
-      preferredPort("/tmp/weird-name", {}, { branch: "main" }),
-      BRANCH_PORTS.main,
-    );
+  it("uses the default port when PORT is unset", () => {
+    assert.equal(preferredPort({}), DEFAULT_PORT);
+    assert.equal(preferredPort({ PORT: "  " }), DEFAULT_PORT);
   });
 
-  it("maps known worktree directory names when branch unknown", () => {
-    assert.equal(
-      preferredPort("/Users/youl/Projects/beatmejy.github.io", {}, { branch: null }),
-      3000,
-    );
-    assert.equal(
-      preferredPort("/Users/youl/Projects/beatmejy-cursor", {}, { branch: null }),
-      3001,
-    );
-    assert.equal(
-      preferredPort("/Users/youl/Projects/beatmejy-claude", {}, { branch: null }),
-      3002,
-    );
-  });
-
-  it("uses non-3000 fallback for unknown directories", () => {
-    assert.equal(
-      preferredPort("/tmp/other-clone", {}, { branch: null }),
-      UNKNOWN_FALLBACK_PORT,
-    );
-  });
-
-  it("honors PORT env over branch/directory mapping", () => {
-    assert.equal(
-      preferredPort("/Users/youl/Projects/beatmejy-cursor", { PORT: "4010" }, {
-        branch: "feature/cursor-work",
-      }),
-      4010,
-    );
+  it("honors PORT env", () => {
+    assert.equal(preferredPort({ PORT: "4010" }), 4010);
   });
 
   it("rejects invalid PORT", () => {
-    assert.throws(() => preferredPort("/tmp", { PORT: "abc" }), /Invalid PORT/);
-    assert.throws(() => preferredPort("/tmp", { PORT: "0" }), /Invalid PORT/);
+    assert.throws(() => preferredPort({ PORT: "abc" }), /Invalid PORT/);
+    assert.throws(() => preferredPort({ PORT: "0" }), /Invalid PORT/);
+    assert.throws(() => preferredPort({ PORT: "65536" }), /Invalid PORT/);
   });
 });
 
@@ -127,30 +50,33 @@ describe("findAvailablePort", () => {
 
 describe("resolveDevPort", () => {
   it("keeps preferred port when free", async () => {
-    const result = await resolveDevPort(
-      "/tmp/x",
-      {},
-      { branch: "feature/cursor-work", isFree: async () => true },
-    );
+    const result = await resolveDevPort({}, { isFree: async () => true });
     assert.deepEqual(result, {
-      preferred: WORKTREE_PORTS["beatmejy-cursor"],
-      port: 3001,
+      preferred: DEFAULT_PORT,
+      port: DEFAULT_PORT,
       redirected: false,
     });
   });
 
   it("redirects when preferred port is busy", async () => {
-    const busy = new Set([3001]);
+    const busy = new Set([DEFAULT_PORT]);
     const result = await resolveDevPort(
-      "/tmp/x",
       {},
-      {
-        branch: "feature/cursor-work",
-        isFree: async (p) => !busy.has(p),
-      },
+      { isFree: async (p) => !busy.has(p) },
     );
-    assert.equal(result.preferred, 3001);
-    assert.equal(result.port, 3002);
+    assert.equal(result.preferred, DEFAULT_PORT);
+    assert.equal(result.port, DEFAULT_PORT + 1);
+    assert.equal(result.redirected, true);
+  });
+
+  it("starts from PORT env when set", async () => {
+    const busy = new Set([4010]);
+    const result = await resolveDevPort(
+      { PORT: "4010" },
+      { isFree: async (p) => !busy.has(p) },
+    );
+    assert.equal(result.preferred, 4010);
+    assert.equal(result.port, 4011);
     assert.equal(result.redirected, true);
   });
 });
