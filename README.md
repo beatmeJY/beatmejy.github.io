@@ -20,25 +20,25 @@ Cursor와 Claude에게 같은 요구를 주고, 서로의 코드를 보지 않�
 
 ```text
 요구사항
-   ├── Agent A (Claude)  →  feature/claude-work 에서 독립 구현
-   └── Agent B (Cursor)  →  feature/cursor-work 에서 독립 구현
+   ├── Agent A (Claude)  →  독립 구현
+   └── Agent B (Cursor)  →  독립 구현
                 ↓
          서로 코드리뷰 (전용 GitHub 계정)
                 ↓
          사람이 판단 · 머지 · 배포
 ```
 
-| 역할 | 브랜치 | 리뷰 계정 |
-| --- | --- | --- |
-| Agent A | `feature/claude-work` | `@beatmejy-claude` |
-| Agent B | `feature/cursor-work` | `@beatmejy-cursor` |
-| 사람 (지율) | `main` 머지·배포 | `@beatmeJY` |
+| 역할 | 리뷰 계정 |
+| --- | --- |
+| Agent A | `@beatmejy-claude` |
+| Agent B | `@beatmejy-cursor` |
+| 사람 (지율) — 커밋·머지·배포 | `@beatmeJY` |
 
-에이전트는 git worktree로 작업 공간을 나눕니다. 같은 디렉터리에서 동시에 고치지 않습니다.
+에이전트는 한 저장소에서 작업합니다. 두 에이전트가 동시에 고쳐야 할 때만 `claude/…`, `cursor/…` 브랜치를 그때 나눕니다.
 
 리뷰는 스타일보다 **정합성, 동시성, 트랜잭션, 장애 처리**를 먼저 봅니다. 두 구현이 모두 합리적이면 하나를 억지로 고르지 않고 사람에게 넘깁니다.
 
-규칙 전문은 [`AGENTS.md`](./AGENTS.md), worktree 레이아웃은 [`WORKTREES.md`](./WORKTREES.md), 리뷰 계정은 [`docs/AGENT-GITHUB-IDENTITIES.md`](./docs/AGENT-GITHUB-IDENTITIES.md)에 있습니다.
+규칙 전문은 [`AGENTS.md`](./AGENTS.md), 리뷰 계정은 [`docs/AGENT-GITHUB-IDENTITIES.md`](./docs/AGENT-GITHUB-IDENTITIES.md)에 있습니다.
 
 ---
 
@@ -49,14 +49,7 @@ npm install
 npm run dev
 ```
 
-`npm run dev`는 **브랜치**로 기본 포트를 정하고(폴더명은 보조), 점유/`EADDRINUSE`면 다음 빈 포트로 재시도합니다.
-
-| 브랜치 / 디렉터리 | 기본 포트 |
-| --- | --- |
-| `main` / `beatmejy.github.io` | 3000 |
-| `feature/cursor-work` / `beatmejy-cursor` | 3001 |
-| `feature/claude-work` / `beatmejy-claude` | 3002 |
-| 그 외 | 3100부터 |
+`npm run dev`는 기본 3000 포트를 쓰고, 점유/`EADDRINUSE`면 다음 빈 포트로 재시도합니다.
 
 시작 시 터미널에 실제 URL이 출력됩니다. `PORT=4010 npm run dev`로 강제할 수 있습니다.
 

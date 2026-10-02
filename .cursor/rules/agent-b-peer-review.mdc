@@ -5,8 +5,8 @@ alwaysApply: true
 
 # Agent B → Agent A PR 자동 코드리뷰
 
-이 Cursor worktree(`beatmejy-cursor`)의 에이전트는 **Agent B**다.
-Agent A는 `feature/claude-work` (worktree: `beatmejy-claude`)에서 작업한다.
+Cursor 에이전트는 **Agent B**다. Agent A(Claude)도 같은 저장소에서 작업하고,
+상호 리뷰용 PR이 필요할 때만 `claude/<주제>` 브랜치를 만든다.
 
 ## 언제 실행하나
 
@@ -20,13 +20,13 @@ Agent A는 `feature/claude-work` (worktree: `beatmejy-claude`)에서 작업한�
 
 ```bash
 gh pr list --repo beatmeJY/beatmejy.github.io --state open \
-  --head feature/claude-work \
-  --json number,title,url,headRefName,updatedAt
+  --json number,title,url,headRefName,updatedAt \
+  --jq '.[] | select(.headRefName | startswith("claude/"))'
 ```
 
-- head가 `feature/claude-work`인 open PR이 대상이다.
+- head가 `claude/`로 시작하는 open PR이 대상이다.
 - 없으면 “Agent A open PR 없음”만 짧게 알리고 끝낸다.
-- **자신의** `feature/cursor-work` PR은 이 규칙으로 리뷰하지 않는다.
+- **자신의** `cursor/…` PR은 이 규칙으로 리뷰하지 않는다.
 
 ## 중복 방지
 
@@ -46,7 +46,7 @@ gh api repos/beatmeJY/beatmejy.github.io/pulls/<N>/reviews --jq '.[] | {user:.us
 
 1. `gh pr diff <N>` / `gh pr view <N>`으로 독립 분석한다. Agent A를 정답으로 두지 않는다.
 2. `AGENTS.md` Code Review 우선순위: 정합성·동시성·트랜잭션·장애·성능·보안. NIT·취향은 보고하지 않는다.
-3. 본인(`feature/cursor-work`) 구현이 열려 있으면 설계 비교까지 한다. 둘 다 합리적이면 HUMAN DECISION.
+3. 본인(`cursor/…`) 구현이 열려 있으면 설계 비교까지 한다. 둘 다 합리적이면 HUMAN DECISION.
 4. **개인 계정(`beatmeJY`)으로 코멘트하지 않는다.** 아래만 사용한다:
 
    ```bash

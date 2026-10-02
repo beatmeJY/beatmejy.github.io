@@ -3,17 +3,17 @@ description: Agent A는 Agent B PR을 감지해 Claude 전용 GitHub 계정으�
 alwaysApply: false
 ---
 
-# Agent A → Agent B PR 코드리뷰 (Claude worktree용)
+# Agent A → Agent B PR 코드리뷰 (Claude용)
 
-이 규칙은 Claude worktree(`beatmejy-claude`, Agent A)에서 켠다.
+이 규칙은 Claude(Agent A)가 리뷰할 때 켠다.
 리뷰 코멘트는 **반드시** Claude 전용 GitHub 계정으로만 남긴다.
 
 ## 대상
 
 ```bash
 gh pr list --repo beatmeJY/beatmejy.github.io --state open \
-  --head feature/cursor-work \
-  --json number,title,url,headRefName,updatedAt
+  --json number,title,url,headRefName,updatedAt \
+  --jq '.[] | select(.headRefName | startswith("cursor/"))'
 ```
 
 ## 게시 (개인 계정 금지)
