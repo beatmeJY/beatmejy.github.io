@@ -1,19 +1,21 @@
 @import "tailwindcss";
 
+/* 블로그는 OS 설정과 관계없이 항상 다크 모드로 보여준다. */
 :root {
-  --background: #f6f8fa;
-  --surface: #ffffff;
-  --foreground: #1f2328;
-  --muted: #656d76;
-  --border: #d0d7de;
-  --accent: #0969da;
-  --accent-hover: #0550ae;
-  --code-bg: #ffffff;
-  --code-inline-bg: #eaeef2;
-  --code-inline-border: #d0d7de;
-  --code-inline-fg: #bc4c00;
-  --quote-bg: #f6f8fa;
-  --shadow: 0 1px 2px rgb(31 35 40 / 6%);
+  color-scheme: dark;
+  --background: #0d1117;
+  --surface: #161b22;
+  --foreground: #e6edf3;
+  --muted: #9198a1;
+  --border: #30363d;
+  --accent: #4493f8;
+  --accent-hover: #79b8ff;
+  --code-bg: #161b22;
+  --code-inline-bg: #21262d;
+  --code-inline-border: #30363d;
+  --code-inline-fg: #f0883e;
+  --quote-bg: #161b22;
+  --shadow: 0 1px 2px rgb(0 0 0 / 40%);
 
   /* 데스크톱 목차를 본문 컬럼 오른쪽에 붙이는 offset: 본문 절반 + 간격 1.5rem.
      본문 max-w가 넓어지는 2xl에서 같이 벌어져야 목차가 본문 위로 겹치지 않는다. */
@@ -37,24 +39,6 @@
   --color-code-bg: var(--code-bg);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0d1117;
-    --surface: #161b22;
-    --foreground: #e6edf3;
-    --muted: #9198a1;
-    --border: #30363d;
-    --accent: #4493f8;
-    --accent-hover: #79b8ff;
-    --code-bg: #161b22;
-    --code-inline-bg: #21262d;
-    --code-inline-border: #30363d;
-    --code-inline-fg: #f0883e;
-    --quote-bg: #161b22;
-    --shadow: 0 1px 2px rgb(0 0 0 / 40%);
-  }
 }
 
 html {
@@ -238,16 +222,8 @@ body {
 
 .markdown pre code[data-theme*=" "],
 .markdown pre code[data-theme*=" "] span {
-  color: var(--shiki-light);
-  background-color: var(--shiki-light-bg);
-}
-
-@media (prefers-color-scheme: dark) {
-  .markdown pre code[data-theme*=" "],
-  .markdown pre code[data-theme*=" "] span {
-    color: var(--shiki-dark);
-    background-color: var(--shiki-dark-bg);
-  }
+  color: var(--shiki-dark);
+  background-color: var(--shiki-dark-bg);
 }
 
 .markdown :not(pre) > code {
